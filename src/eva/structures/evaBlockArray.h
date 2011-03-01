@@ -70,18 +70,20 @@ namespace eva
 		if(newBlockCount < mBlockCount)
 			for(e_uint32 i = mBlockCount-1; i < (newBlockCount-1); ++i)
 			{
-				delete mBlockPointers[i];
-				mBlockPointers[i] = 0;
+				//TODO: Wrong, need to merely reset the data
+				//delete mBlockPointers[i];
+				//mBlockPointers[i] = 0;
 			}
-
-		// Only resize if block count is different
-		if(newBlockCount != mBlockPointers.getSize())
-			mBlockPointers->resize(newBlockCount);
 
 		// If there are going to be more blocks, initialize them
 		if(newBlockCount > mBlockCount)
+		{
+			// Only resize the number of pointers if block count is greater
+			mBlockPointers->resize(newBlockCount);
+
 			for(e_uint32 i = mBlockCount; i < newBlockCount; ++i)
 				mBlockPointers[i] = this->initalizeNewBlock();
+		}
 
 		mBlockCount = newBlockCount;
 		mElements = size;
@@ -134,7 +136,7 @@ namespace eva
 			mBlockPointers[i] = temp;
 			temp = tempTwo;
 		}
-		mBlockCount++;
+		--mBlockCount;
 
 	}
 
