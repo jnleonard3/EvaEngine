@@ -1,0 +1,5 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+ADD_TEST(EvaSimpleDynamicArrayTest ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/EvaSimpleDynamicArrayTest)
+ADD_EXECUTABLE(EvaSimpleDynamicArrayTest ${TEST_MAIN} TestEvaSimpleDynamicArray.cpp)
+TARGET_LINK_LIBRARIES(EvaSimpleDynamicArrayTest ${CPPUNIT_LIBRARIES})
