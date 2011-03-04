@@ -12,7 +12,7 @@ function buildDebug {
 		mkdir -p build/$SYSTEM/debug
 	fi
 	cd build/$SYSTEM/debug
-	cmake ../../../src -DCMAKE_BUILD_TYPE=Debug
+	cmake ../../../src -DCMAKE_BUILD_TYPE=Debug $1
 	make
 }
 
@@ -24,7 +24,7 @@ function buildRelease {
 		mkdir -p build/$SYSTEM/release
 	fi
 	cd build/$SYSTEM/release
-	cmake ../../../src -DCMAKE_BUILD_TYPE=Release
+	cmake ../../../src -DCMAKE_BUILD_TYPE=Release $1
 	make
 }
 
@@ -45,7 +45,7 @@ else
 			then
 				if [ -d "build/$SYSTEM/release" ]
 				then
-					buildRelease
+					buildRelease -BUILD_TESTS=1
 					cd tests
 					ctest -V
 				elif [ -d "build/$SYSTEM/debug" ]
@@ -66,6 +66,8 @@ else
 					then
 						cd src
 						doxygen Doxyfile
+					else
+						echo "Invalid option '$1' chosen. Terminating script." 
 					fi
 				fi
 			fi

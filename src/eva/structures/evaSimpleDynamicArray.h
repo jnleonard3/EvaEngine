@@ -74,11 +74,21 @@ namespace eva
 		/**
 		 * Returns a reference to the element at index 'index' in the array
 		 */
-		T& operator[] (unsigned int index) { return mArray[index]; };
+		T& at(unsigned int index) { return mArray[index]; };
+
 		/**
 		 * Returns a const-reference to the element at index 'index' in the array
 		 */
-		const T& operator[] (unsigned int index) const { return mArray[index]; };
+		const T& at(unsigned int index) const { return mArray[index]; };
+
+		/**
+		 * Returns a reference to the element at index 'index' in the array
+		 */
+		T& operator[] (unsigned int index) { return this->at(index); };
+		/**
+		 * Returns a const-reference to the element at index 'index' in the array
+		 */
+		const T& operator[] (unsigned int index) const { return this->at(index); };
 
 	private:
 		e_uint32 mElements;

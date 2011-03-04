@@ -11,7 +11,7 @@ namespace eva
 	{
 		public:
 			BlockArray(e_uint32 blockSize = 256):mBlockPointers(),mBlockSize(blockSize),mBlockCount(0),mElements(0){};
-			BlockArray(e_uint32 size, e_uint32 blockSize = 256);
+			BlockArray(e_uint32 size, e_uint32 blockSize);
 
 			e_uint32 getBlockSize() const { return mBlockSize; };
 			e_uint32 getSize() const { return mElements; };
@@ -29,7 +29,6 @@ namespace eva
 			void deleteBlock(e_uint32 index);
 
 			e_uint32 getElementsPerBlock() const;
-			e_uint32 getBlockCount() const;
 			e_uint32 getMemoryUsage() const;
 
 			T& at(e_uint32 index);
@@ -40,6 +39,8 @@ namespace eva
 
 		private:
 			T* initializeNewBlock() const;
+			void clearBlock(T* block);
+			e_uint32 getBlockOffset(e_uint32 index) const;
 
 			SimpleDynamicArray<T*> mBlockPointers;
 			e_uint32 mBlockSize, mBlockCount, mElements;
@@ -49,40 +50,29 @@ namespace eva
 	BlockArray<T>::BlockArray(e_uint32 size, e_uint32 blockSize)
 	: mBlockPointers(),mBlockSize(blockSize),mBlockCount(0),mElements(size)
 	{
-		e_float32 blockCountF = (e_float32)size/(e_float32)this->getElementsPerBlock();
-		mBlockCount = (e_uint32)blockCountF;
-		if(blockCountF > mBlockCount)
-			++mBlockCount;
-		mBlockPointers->resize(mBlockCount);
+		mBlockCount = (size/this->getElementsPerBlock())+1;
+		mBlockPointers.resize(mBlockCount);
 		for(e_uint32 i = 0; i < mBlockPointers.getSize(); ++i)
-			mBlockPointers[i] = this->initalizeNewBlock();
+			mBlockPointers[i] = this->initializeNewBlock();
 	}
 
 	template <class T>
 	void BlockArray<T>::resize(e_uint32 size)
 	{
-		e_float32 blockCountF = (e_float32)size/(e_float32)this->getElementsPerBlock();
-		e_uint32 newBlockCount = (e_uint32)blockCountF;
-		if(blockCountF > newBlockCount)
-				++newBlockCount;
-
-		// Clear the blocks if data would be truncated
+		e_uint32 newBlockCount = (size/this->getElementsPerBlock())+1;
+		// Clear the data in blocks if data would be truncated by the resize
 		if(newBlockCount < mBlockCount)
 			for(e_uint32 i = mBlockCount-1; i < (newBlockCount-1); ++i)
-			{
-				//TODO: Wrong, need to merely reset the data
-				//delete mBlockPointers[i];
-				//mBlockPointers[i] = 0;
-			}
+				this->clearBlock(mBlockPointers[i]);
 
 		// If there are going to be more blocks, initialize them
 		if(newBlockCount > mBlockCount)
 		{
 			// Only resize the number of pointers if block count is greater
-			mBlockPointers->resize(newBlockCount);
+			mBlockPointers.resize(newBlockCount);
 
-			for(e_uint32 i = mBlockCount; i < newBlockCount; ++i)
-				mBlockPointers[i] = this->initalizeNewBlock();
+			for(e_uint32 i = mBlockCount; i < mBlockPointers.getSize(); ++i)
+				mBlockPointers[i] = this->initializeNewBlock();
 		}
 
 		mBlockCount = newBlockCount;
@@ -100,7 +90,7 @@ namespace eva
 	{
 		T* temp = mBlockPointers[indexFrom];
 		mBlockPointers[indexFrom] = mBlockPointers[indexTo];
-		mBlockPointers[indexTo] = mBlockPointers[temp];
+		mBlockPointers[indexTo] = temp;
 	}
 
 	template <class T>
@@ -130,14 +120,11 @@ namespace eva
 	void BlockArray<T>::deleteBlock(e_uint32 index)
 	{
 		T* temp = mBlockPointers[index];
+		this->clearBlock(temp);
 		for(e_uint32 i = index+1; i < mBlockCount; ++i)
-		{
-			T* tempTwo = mBlockPointers[i];
-			mBlockPointers[i] = temp;
-			temp = tempTwo;
-		}
+			mBlockPointers[i-1] = mBlockPointers[i];
 		--mBlockCount;
-
+		mBlockPointers[mBlockCount] = temp;
 	}
 
 	template <class T>
@@ -147,9 +134,40 @@ namespace eva
 	}
 
 	template <class T>
+	e_uint32 BlockArray<T>::getMemoryUsage() const
+	{
+		return mBlockSize*mBlockPointers.getSize();
+	}
+
+	template <class T>
+	T& BlockArray<T>::at(e_uint32 index)
+	{
+		return mBlockPointers.at(this->getBlockIndex(index))[this->getBlockOffset(index)];
+	}
+
+	template <class T>
+	const T& BlockArray<T>::at(e_uint32 index) const
+	{
+		return mBlockPointers.at(this->getBlockIndex(index))[this->getBlockOffset(index)];
+	}
+
+	template <class T>
 	T* BlockArray<T>::initializeNewBlock() const
 	{
 		return new T[this->getElementsPerBlock()];
+	}
+
+	template <class T>
+	void BlockArray<T>::clearBlock(T* block)
+	{
+		for(e_uint32 i = 0; i < this->getElementsPerBlock(); ++i)
+			block[i] = T();
+	}
+
+	template <class T>
+	e_uint32 BlockArray<T>::getBlockOffset(e_uint32 index) const
+	{
+		return index - this->getBlockIndex(index)*this->getElementsPerBlock();
 	}
 
 }
