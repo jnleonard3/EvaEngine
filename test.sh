@@ -1,5 +1,3 @@
-#!/bin/bash
-
 SYSTEM_TYPE=$(uname -s)
 SYSTEM_TYPE=$(echo "$SYSTEM_TYPE" | sed 's/[()\/\._-]//g')
 SYSTEM_VERSION=$(uname -r)
@@ -15,7 +13,7 @@ function buildDebug {
 		mkdir -p build/$SYSTEM/debug
 	fi
 	cd build/$SYSTEM/debug
-	cmake ../../../src -DCMAKE_BUILD_TYPE=Debug $1
+	cmake ../../../src -DCMAKE_BUILD_TYPE=Debug
 	make
 }
 
@@ -27,38 +25,22 @@ function buildRelease {
 		mkdir -p build/$SYSTEM/release
 	fi
 	cd build/$SYSTEM/release
-	cmake ../../../src -DCMAKE_BUILD_TYPE=Release $1
+	cmake ../../../src -DCMAKE_BUILD_TYPE=Release
 	make
 }
 
-if [ "$1" = "debug" ]
+if [ -d "build/$SYSTEM/release" ]
+then
+	buildRelease
+	cd tests
+	ctest $1 $2 $3
+elif [ -d "build/$SYSTEM/debug" ]
 then
 	buildDebug
+	cd tests
+	ctest $1 $2 $3
 else
-	if [ "$1" = "release" ]
-	then
-		buildRelease
-	else
-		if [ "$1" = "clean" ]
-		then
-			echo "Cleaning build directory"
-			rm -Rf build
-		else
-			if [ "$1" = "doxygen" ]
-			then
-				cd src
-				doxygen Doxyfile
-			else
-				if [ "$1" = "all" ]
-				then
-					./build.sh debug
-					./build.sh release
-					./build.sh doxygen
-				else
-					echo "Invalid option '$1' chosen. Terminating script." 
-				fi
-			fi
-		fi	
-	fi
+	echo "No build detected. Canceling testing."
 fi
+
 

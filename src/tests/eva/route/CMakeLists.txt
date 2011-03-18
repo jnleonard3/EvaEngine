@@ -1,0 +1,5 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+ADD_TEST(EvaRouteElementsTest ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/EvaRouteElementsTest)
+ADD_EXECUTABLE(EvaRouteElementsTest ${TEST_MAIN} TestEvaRouteElements.cpp)
+TARGET_LINK_LIBRARIES(EvaRouteElementsTest EvaEngineLib ${CPPUNIT_LIBRARIES})

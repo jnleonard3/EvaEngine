@@ -1,44 +1,59 @@
 #include "evaRouteNode.h"
+#include "evaRouteGraphEdge.h"
 
 namespace eva
 {
-	RouteNode* RouteNode::getFromNode(e_uchar8 index) const
+	RouteGraphEdge* RouteNode::getFromEdge(e_uchar8 index) const
 	{
-		if(index < mNumNodesFrom)
-			return mNodesFrom[index];
-		else
-			return 0;
+		if(index < mNumEdgesFrom)
+			return mEdgesFrom[index];
+		return 0;
 	}
 
-	RouteNode* RouteNode::getToNode(e_uchar8 index) const
+	RouteGraphEdge* RouteNode::getToEdge(e_uchar8 index) const
 	{
-		if(index < mNumNodesTo)
-			return mNodesTo[index];
-		else
-			return 0;
+		if(index < mNumEdgesTo)
+			return mEdgesTo[index];
+		return 0;
 	}
 
-	void RouteNode::setFromNode(e_uchar8 index, RouteNode *fromNode)
+	bool RouteNode::setFromEdge(e_uchar8 index, RouteGraphEdge *fromEdge)
 	{
-		if(index < mNumNodesFrom)
-			mNodesFrom[index] = fromNode;
+		if(index < mNumEdgesFrom)
+		{
+			mEdgesFrom[index] = fromEdge;
+			return true;
+		}
+		return false;
 	}
 
-	void RouteNode::setToNode(e_uchar8 index, RouteNode *toNode)
+	bool RouteNode::setToEdge(e_uchar8 index, RouteGraphEdge *toEdge)
 	{
-		if(index < mNumNodesTo)
-			mNodesTo[index] = toNode;
+		if(index < mNumEdgesTo)
+		{
+			mEdgesTo[index] = toEdge;
+			return true;
+		}
+		return false;
 	}
 
-	void RouteNode::setNodesFrom(e_uchar8 count, RouteNode **from)
+	void RouteNode::setEdgesFrom(e_uchar8 count, RouteGraphEdge **from)
 	{
-		mNumNodesFrom = count;
-		mNodesFrom = from;
+		mNumEdgesFrom = count;
+		mEdgesFrom = from;
 	}
 
-	void RouteNode::setNodesTo(e_uchar8 count, RouteNode **to)
+	void RouteNode::setEdgesTo(e_uchar8 count, RouteGraphEdge **to)
 	{
-		mNumNodesFrom = count;
-		mNodesTo = to;
+		mNumEdgesTo = count;
+		mEdgesTo = to;
+	}
+
+	void RouteNode::clear()
+	{
+		delete mEdgesFrom;
+		delete mEdgesTo;
+		mNumEdgesFrom = 0;
+		mNumEdgesTo = 0;
 	}
 }

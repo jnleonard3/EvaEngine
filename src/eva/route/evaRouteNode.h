@@ -2,38 +2,40 @@
 #define EVA_ROUTENODE_H_
 
 #include "eva/Typedefs.h"
-#include "geometry/evaPoint3D.h"
+#include "eva/geometry/evaPoint3D.h"
 
 namespace eva
 {
+	class RouteGraphEdge;
+
 	class RouteNode
 	{
 		public:
-			RouteNode():mId(0),mNumNodesFrom(0),mNumNodesTo(0){};
-			RouteNode(e_uint32 id, Point3Df pt):mId(id),mPoint(pt),mNumNodesFrom(0),mNumNodesTo(0){};
-			RouteNode(e_uint32 id, Point3Df pt, e_uchar8 numfromto, RouteNode **from, RouteNode **to):mId(id),mPoint(pt),mNumNodesFrom(numfromto),mNumNodesTo(numfromto),mNodesFrom(from),mNodesTo(to){};
-			RouteNode(e_uint32 id, Point3Df pt, e_uchar8 numfrom, RouteNode **from, e_uchar8 numto, RouteNode **to):mId(id),mPoint(pt),mNumNodesFrom(numfrom),mNumNodesTo(numto),mNodesFrom(from),mNodesTo(to){};
+			RouteNode():mNumEdgesFrom(0),mNumEdgesTo(0){};
+			RouteNode(Point3Df pt):mPoint(pt),mNumEdgesFrom(0),mNumEdgesTo(0){};
+			RouteNode(Point3Df pt, e_uchar8 numfromto, RouteGraphEdge **from, RouteGraphEdge **to):mPoint(pt),mNumEdgesFrom(numfromto),mNumEdgesTo(numfromto),mEdgesFrom(from),mEdgesTo(to){};
+			RouteNode(Point3Df pt, e_uchar8 numfrom, RouteGraphEdge **from, e_uchar8 numto, RouteGraphEdge **to):mPoint(pt),mNumEdgesFrom(numfrom),mNumEdgesTo(numto),mEdgesFrom(from),mEdgesTo(to){};
 
-			e_uint32 getId() const {return mId;};
 			Point3Df getPoint() const {return mPoint;};
 
-			e_uchar8 getNumNodesFrom() const { return mNumNodesFrom; };
-			e_uchar8 getNumNodesTo() const { return mNumNodesTo; };
+			e_uchar8 getNumEdgesFrom() const { return mNumEdgesFrom; };
+			e_uchar8 getNumEdgesTo() const { return mNumEdgesTo; };
 
-			RouteNode* getFromNode(e_uchar8 index) const;
-			RouteNode* getToNode(e_uchar8 index) const;
+			RouteGraphEdge* getFromEdge(e_uchar8 index) const;
+			RouteGraphEdge* getToEdge(e_uchar8 index) const;
 
-			void setFromNode(e_uchar8 index, RouteNode *fromNode);
-			void setToNode(e_uchar8 index, RouteNode *toNode);
+			bool setFromEdge(e_uchar8 index, RouteGraphEdge *fromEdge);
+			bool setToEdge(e_uchar8 index, RouteGraphEdge *toEdge);
 
-			void setNodesFrom(e_uchar8 count, RouteNode **from);
-			void setNodesTo(e_uchar8 count, RouteNode **to);
+			void setEdgesFrom(e_uchar8 count, RouteGraphEdge **from);
+			void setEdgesTo(e_uchar8 count, RouteGraphEdge **to);
+
+			void clear();
 
 		private:
-			const e_uint32 mId;
 			const Point3Df mPoint;
-			e_uchar8 mNumNodesFrom, mNumNodesTo;
-			RouteNode **mNodesFrom, **mNodesTo;
+			e_uchar8 mNumEdgesFrom, mNumEdgesTo;
+			RouteGraphEdge **mEdgesFrom, **mEdgesTo;
 	};
 }
 
