@@ -17,6 +17,7 @@ class TestEvaBlockArray : public CPPUNIT_NS :: TestFixture
     CPPUNIT_TEST_SUITE(TestEvaBlockArray);
     CPPUNIT_TEST(constructorTest);
     CPPUNIT_TEST(resizeTest);
+    CPPUNIT_TEST(getIndexOfAddressTest);
     CPPUNIT_TEST(swapBlockTest);
     CPPUNIT_TEST(moveBlockTest);
     CPPUNIT_TEST(deleteBlockTest);
@@ -29,6 +30,7 @@ class TestEvaBlockArray : public CPPUNIT_NS :: TestFixture
 	protected:
     	void constructorTest();
     	void resizeTest();
+    	void getIndexOfAddressTest();
     	void swapBlockTest();
     	void moveBlockTest();
     	void deleteBlockTest();

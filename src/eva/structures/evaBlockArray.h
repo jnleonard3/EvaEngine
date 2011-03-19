@@ -28,6 +28,8 @@ namespace eva
 			void moveBlock(e_uint32 indexFrom, e_uint32 indexTo);
 			void deleteBlock(e_uint32 index);
 
+			e_uint32 getIndexOfAddress(const T* const address) const;
+
 			e_uint32 getElementsPerBlock() const;
 			e_uint32 getMemoryUsage() const;
 
@@ -125,6 +127,19 @@ namespace eva
 			mBlockPointers[i-1] = mBlockPointers[i];
 		--mBlockCount;
 		mBlockPointers[mBlockCount] = temp;
+	}
+
+	template <class T>
+	e_uint32 BlockArray<T>::getIndexOfAddress(const T* const address) const
+	{
+		const e_uint32 elemsPerBlock = this->getElementsPerBlock();
+		for(e_uint32 i = 0; i < mBlockCount; ++i)
+		{
+			e_uint32 offset = address - mBlockPointers.at(i);
+			if(offset < elemsPerBlock)
+				return offset + (i*elemsPerBlock);
+		}
+		return mElements + 1;
 	}
 
 	template <class T>

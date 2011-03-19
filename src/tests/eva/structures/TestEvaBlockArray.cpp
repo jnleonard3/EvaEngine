@@ -58,6 +58,15 @@ void TestEvaBlockArray::resizeTest()
 
 }
 
+void TestEvaBlockArray::getIndexOfAddressTest()
+{
+	for(e_uint32 i = 0; i < b->getSize(); ++i)
+		b->at(i) = i;
+
+	for(e_uint32 i = 0; i < b->getSize(); ++i)
+		CPPUNIT_ASSERT_EQUAL(i, b->getIndexOfAddress(&b->at(i)));
+}
+
 void TestEvaBlockArray::swapBlockTest()
 {
 	for(e_uint32 i = 0; i < b->getSize(); ++i)
