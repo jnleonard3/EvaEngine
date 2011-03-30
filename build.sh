@@ -9,7 +9,15 @@ CALLING_DIRECTORY=$(pwd)
 SYSTEM=$SYSTEM_TYPE-$SYSTEM_VERSION
 
 function printHelp {
-	echo "Lol"
+	echo "build.sh Options:"
+	echo "   -h : Display this menu"
+	echo "   -d : Build Doxygen documentation"
+	echo "   -t : Build unit/performance tests"
+	echo "   -c : Clean all builds"
+	echo "   -r : Run unit/performance tests"
+	echo "   -R params : Run unit/performance tests with the given parameters"
+	echo "               (See ctest man page for parameters)"
+	echo "   -b debug|release|all : Build the project in the selected configuration"
 }
 
 function build {
@@ -39,9 +47,17 @@ function buildRelease {
 CLEAN_BUILD=
 BUILD_DOXYGEN=
 BUILD_TESTS=
+RUN_TESTS=
+TEST_PARAMETERS=
 BUILD_TYPE=
 
-while getopts "hdtcb:" OPTION
+if [ "$#" -eq "0" ]
+then
+	printHelp
+	exit 1
+fi
+
+while getopts "hdtcrR:b:" OPTION
 do
 	case $OPTION in
 		h)
@@ -53,6 +69,13 @@ do
 			;;
 		t)
 			BUILD_TESTS="TRUE"
+			;;
+		r)
+			RUN_TESTS="TRUE"
+			;;
+		R)
+			RUN_TESTS="TRUE"
+			TEST_PARAMETERS=$OPTARG
 			;;
 		c)
 			CLEAN_BUILD="TRUE"
@@ -69,8 +92,8 @@ done
 
 if [ "$CLEAN_BUILD" = "TRUE" ]
 then
-	cd $CALLING_DIRECTORY
 	echo "STATUS: Cleaning build directory"
+	cd $CALLING_DIRECTORY
 	rm -Rf build
 	echo "STATUS: Done!"
 fi
@@ -90,10 +113,28 @@ then
 	buildRelease
 fi
 
+if [ "$RUN_TESTS" = "TRUE" ]
+then
+	echo "STATUS: Running tests"
+	cd $CALLING_DIRECTORY
+	if [ -d "build/$SYSTEM/release" ]
+	then
+		cd build/$SYSTEM/release/tests
+		ctest $TEST_PARAMETERS
+	elif [ -d "build/$SYSTEM/debug" ]
+	then
+		cd build/$SYSTEM/debug/tests
+		ctest $TEST_PARAMETERS
+	else
+		echo "STATUS: No build detected. Testing skipped."
+	fi
+	echo "STATUS: Done!"
+fi
+
 if [ "$BUILD_DOXYGEN" = "TRUE" -a "$(which doxygen)" != "" ]
 then
-	cd $CALLING_DIRECTORY
 	echo "STATUS: Generating Doxygen documents"
+	cd $CALLING_DIRECTORY
 	if [ ! -d "build" ]
 	then
 		mkdir -p build
