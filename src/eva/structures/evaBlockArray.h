@@ -17,6 +17,8 @@ namespace eva
 			e_uint32 getSize() const { return mElements; };
 			e_uint32 getBlockCount() const { return mBlockCount; };
 
+			T& pushBack(T data);
+
 			void resize(e_uint32 size);
 
 			/**
@@ -56,6 +58,14 @@ namespace eva
 		mBlockPointers.resize(mBlockCount);
 		for(e_uint32 i = 0; i < mBlockPointers.getSize(); ++i)
 			mBlockPointers[i] = this->initializeNewBlock();
+	}
+
+	template <class T>
+	T& BlockArray<T>::pushBack(T data)
+	{
+		this->resize(this->getSize()+1);
+		this->at(this->getSize()-1) = data;
+		return this->at(this->getSize()-1);
 	}
 
 	template <class T>

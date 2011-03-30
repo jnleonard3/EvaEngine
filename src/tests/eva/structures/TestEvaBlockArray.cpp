@@ -102,3 +102,8 @@ void TestEvaBlockArray::deleteBlockTest()
 	CPPUNIT_ASSERT_EQUAL((e_uint32)128,(e_uint32)b->at(64));
 	CPPUNIT_ASSERT_EQUAL((e_uint32)64,(e_uint32)b->at(0));
 }
+
+void TestEvaBlockArray::pushBackTest()
+{
+	a->pushBack(0);
+}

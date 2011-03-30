@@ -21,6 +21,7 @@ class TestEvaBlockArray : public CPPUNIT_NS :: TestFixture
     CPPUNIT_TEST(swapBlockTest);
     CPPUNIT_TEST(moveBlockTest);
     CPPUNIT_TEST(deleteBlockTest);
+    CPPUNIT_TEST(pushBackTest);
     CPPUNIT_TEST_SUITE_END();
 
 	public:
@@ -34,6 +35,7 @@ class TestEvaBlockArray : public CPPUNIT_NS :: TestFixture
     	void swapBlockTest();
     	void moveBlockTest();
     	void deleteBlockTest();
+    	void pushBackTest();
 
 	private:
     	eva::BlockArray<e_uint32> *a, *b;
