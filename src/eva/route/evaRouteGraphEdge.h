@@ -22,6 +22,8 @@ namespace eva
 			RouteGraphEdge(e_uchar8 type, RouteNode *to, RouteNode *from):mType(type),mTo(to),mFrom(from),mNumEdgesConnected(0),mConnectedEdges(0){};;
 			RouteGraphEdge(e_uchar8 type, RouteNode *to, RouteNode *from, e_uchar8 numconnected, RouteGraphEdge **connected):mType(type),mTo(to),mFrom(from),mNumEdgesConnected(numconnected),mConnectedEdges(connected){};
 
+			e_uchar8 getType() const { return mType; };
+
 			RouteNode* getNodeTo() const { return mTo; };
 			RouteNode* getNodeFrom() const { return mFrom; };
 
@@ -33,11 +35,12 @@ namespace eva
 
 			void setConnectedEdges(e_uchar8 count, RouteGraphEdge **edges);
 
+			void invalidate() {mType = ROUTEEDGE_INVALID;};
 			void clear();
 
 		private:
-			const e_uchar8 mType;
-			RouteNode * const mTo, * const mFrom;
+			e_uchar8 mType;
+			RouteNode *mTo, *mFrom;
 			e_uchar8 mNumEdgesConnected;
 			RouteGraphEdge **mConnectedEdges;
 	};

@@ -23,7 +23,6 @@ namespace eva
 			const T& z() const {return mZ;};
 
 			T distanceFrom(Point3D<T> point) const;
-
 		private:
 			T mX, mY, mZ;
 	};

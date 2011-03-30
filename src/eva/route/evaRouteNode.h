@@ -12,11 +12,11 @@ namespace eva
 	{
 		public:
 			RouteNode():mNumEdgesFrom(0),mNumEdgesTo(0){};
-			RouteNode(Point3Df pt):mPoint(pt),mNumEdgesFrom(0),mNumEdgesTo(0){};
-			RouteNode(Point3Df pt, e_uchar8 numfromto, RouteGraphEdge **from, RouteGraphEdge **to):mPoint(pt),mNumEdgesFrom(numfromto),mNumEdgesTo(numfromto),mEdgesFrom(from),mEdgesTo(to){};
-			RouteNode(Point3Df pt, e_uchar8 numfrom, RouteGraphEdge **from, e_uchar8 numto, RouteGraphEdge **to):mPoint(pt),mNumEdgesFrom(numfrom),mNumEdgesTo(numto),mEdgesFrom(from),mEdgesTo(to){};
+			RouteNode(Point3Dd pt):mPoint(pt),mNumEdgesFrom(0),mNumEdgesTo(0){};
+			RouteNode(Point3Dd pt, e_uchar8 numfromto, RouteGraphEdge **from, RouteGraphEdge **to):mPoint(pt),mNumEdgesFrom(numfromto),mNumEdgesTo(numfromto),mEdgesFrom(from),mEdgesTo(to){};
+			RouteNode(Point3Dd pt, e_uchar8 numfrom, RouteGraphEdge **from, e_uchar8 numto, RouteGraphEdge **to):mPoint(pt),mNumEdgesFrom(numfrom),mNumEdgesTo(numto),mEdgesFrom(from),mEdgesTo(to){};
 
-			Point3Df getPoint() const {return mPoint;};
+			Point3Dd getPoint() const {return mPoint;};
 
 			e_uchar8 getNumEdgesFrom() const { return mNumEdgesFrom; };
 			e_uchar8 getNumEdgesTo() const { return mNumEdgesTo; };
@@ -30,10 +30,13 @@ namespace eva
 			void setEdgesFrom(e_uchar8 count, RouteGraphEdge **from);
 			void setEdgesTo(e_uchar8 count, RouteGraphEdge **to);
 
+			bool isUnconnected() const;
 			void clear();
 
+			//RouteNode& operator=(RouteNode const& rhs) {; return *this; };
+
 		private:
-			const Point3Df mPoint;
+			Point3Dd mPoint;
 			e_uchar8 mNumEdgesFrom, mNumEdgesTo;
 			RouteGraphEdge **mEdgesFrom, **mEdgesTo;
 	};

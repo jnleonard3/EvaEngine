@@ -49,8 +49,20 @@ namespace eva
 		mEdgesTo = to;
 	}
 
+	bool RouteNode::isUnconnected() const
+	{
+		for(e_uint32 i = 0; i < mNumEdgesFrom; ++i)
+			if(mEdgesFrom[i] != 0 && mEdgesFrom[i]->getType() != ROUTEEDGE_INVALID)
+				return false;
+		for(e_uint32 i = 0; i < mNumEdgesTo; ++i)
+			if(mEdgesTo[i] != 0 && mEdgesTo[i]->getType() != ROUTEEDGE_INVALID)
+				return false;
+		return true;
+	}
+
 	void RouteNode::clear()
 	{
+		//TODO: How about invalidate all the active edges instead?
 		delete mEdgesFrom;
 		delete mEdgesTo;
 		mNumEdgesFrom = 0;

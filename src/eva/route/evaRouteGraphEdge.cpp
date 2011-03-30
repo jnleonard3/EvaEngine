@@ -1,5 +1,4 @@
 #include "evaRouteGraphEdge.h"
-#include "evaRouteNode.h"
 
 namespace eva
 {
