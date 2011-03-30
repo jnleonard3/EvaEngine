@@ -7,5 +7,12 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 MESSAGE(STATUS "Build Directory: " ${CMAKE_BINARY_DIR})
 MESSAGE(STATUS "Build Type: " ${CMAKE_BUILD_TYPE})
 
+# Build core components
 ADD_SUBDIRECTORY(eva)
+ADD_SUBDIRECTORY(eva/osg)
+
+# Build applications
+ADD_SUBDIRECTORY(apps)
+
+# Build unit/performance tests
 ADD_SUBDIRECTORY(tests)
