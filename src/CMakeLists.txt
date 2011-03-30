@@ -15,4 +15,6 @@ ADD_SUBDIRECTORY(eva/osg)
 ADD_SUBDIRECTORY(apps)
 
 # Build unit/performance tests
-ADD_SUBDIRECTORY(tests)
+IF($ENV{EVA_BUILD_TESTS})
+	ADD_SUBDIRECTORY(tests)
+ENDIF()
