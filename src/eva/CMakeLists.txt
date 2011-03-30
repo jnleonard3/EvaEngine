@@ -16,6 +16,7 @@ SET(GEOMETRY_HEADERS	geometry/evaPoint2D.h
 
 SET(ROUTE_SOURCE	route/evaRouteGraphEdge.cpp
 					route/evaRouteNode.cpp
+					route/evaRouteGraph.cpp
 	)
 
 SET(ROUTE_HEADERS	route/evaRouteGraphEdge.h

@@ -7,7 +7,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION (TestRouteElements);
 
 void TestRouteElements::setUp()
 {
-	eva::Point3Df a(4.0f,5.0f, 1.0f), b(3.0f,1.0f, 2.0f), c(8.0f,4.0f,7.0f), d(1.0f,2.0f,3.0f);
+	eva::Point3Dd a(4.0,5.0, 1.0), b(3.0,1.0, 2.0), c(8.0,4.0,7.0), d(1.0,2.0,3.0);
 	nodeA = new eva::RouteNode(a);
 	nodeB = new eva::RouteNode(b);
 	nodeC = new eva::RouteNode(c);
@@ -72,9 +72,9 @@ void TestRouteElements::edgeAccessorsTest()
 
 void TestRouteElements::nodeAccessorsTest()
 {
-	CPPUNIT_ASSERT_EQUAL((e_float32)4.0f, nodeA->getPoint().x());
-	CPPUNIT_ASSERT_EQUAL((e_float32)5.0f, nodeA->getPoint().y());
-	CPPUNIT_ASSERT_EQUAL((e_float32)1.0f, nodeA->getPoint().z());
+	CPPUNIT_ASSERT_EQUAL((e_double64)4.0, nodeA->getPoint().x());
+	CPPUNIT_ASSERT_EQUAL((e_double64)5.0, nodeA->getPoint().y());
+	CPPUNIT_ASSERT_EQUAL((e_double64)1.0, nodeA->getPoint().z());
 
 	CPPUNIT_ASSERT_EQUAL((e_uchar8)0, nodeA->getNumEdgesFrom());
 	CPPUNIT_ASSERT_EQUAL((e_uchar8)0, nodeA->getNumEdgesTo());
@@ -82,10 +82,10 @@ void TestRouteElements::nodeAccessorsTest()
 	CPPUNIT_ASSERT_EQUAL((eva::RouteGraphEdge*)0, nodeA->getFromEdge(0));
 	CPPUNIT_ASSERT_EQUAL((eva::RouteGraphEdge*)0, nodeA->getToEdge(0));
 
-	eva::RouteNode a(eva::Point3Df(1.0f,2.0f,3.0f),3,edgeArrayA,edgeArrayB);
-	CPPUNIT_ASSERT_EQUAL((e_float32)1.0f, a.getPoint().x());
-	CPPUNIT_ASSERT_EQUAL((e_float32)2.0f, a.getPoint().y());
-	CPPUNIT_ASSERT_EQUAL((e_float32)3.0f, a.getPoint().z());
+	eva::RouteNode a(eva::Point3Dd(1.0,2.0,3.0),3,edgeArrayA,edgeArrayB);
+	CPPUNIT_ASSERT_EQUAL((e_double64)1.0, a.getPoint().x());
+	CPPUNIT_ASSERT_EQUAL((e_double64)2.0, a.getPoint().y());
+	CPPUNIT_ASSERT_EQUAL((e_double64)3.0, a.getPoint().z());
 
 	CPPUNIT_ASSERT_EQUAL((e_uchar8)3, a.getNumEdgesFrom());
 	CPPUNIT_ASSERT_EQUAL((e_uchar8)3, a.getNumEdgesTo());
@@ -101,7 +101,13 @@ void TestRouteElements::nodeAccessorsTest()
 
 void TestRouteElements::edgeSettersTest()
 {
+	eva::RouteNode a = *nodeA;
+	CPPUNIT_ASSERT_EQUAL((e_double64)4.0, a.getPoint().x());
+	CPPUNIT_ASSERT_EQUAL((e_double64)5.0, a.getPoint().y());
+	CPPUNIT_ASSERT_EQUAL((e_double64)1.0, a.getPoint().z());
 
+	CPPUNIT_ASSERT_EQUAL((e_uchar8)0, a.getNumEdgesFrom());
+	CPPUNIT_ASSERT_EQUAL((e_uchar8)0, a.getNumEdgesTo());
 }
 
 void TestRouteElements::nodeSettersTest()
