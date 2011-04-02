@@ -22,15 +22,24 @@ namespace eva
 			T& z(){return mZ;};
 			const T& z() const {return mZ;};
 
-			T distanceFrom(Point3D<T> point) const;
+			T distanceFrom(const Point3D<T>& point) const;
+
+			Point3D<T> difference(const Point3D<T>& point) const;
+
 		private:
 			T mX, mY, mZ;
 	};
 
 	template <class T>
-	T Point3D<T>::distanceFrom(Point3D<T> point) const
+	T Point3D<T>::distanceFrom(const Point3D<T>& point) const
 	{
 		return sqrt(pow(this->x()-point.x(),2)+pow(this->y()-point.y(),2)+pow(this->z()-point.z(),2));
+	}
+
+	template <class T>
+	Point3D<T> Point3D<T>::difference(const Point3D<T>& point) const
+	{
+		return Point3D<T>(abs(this->x()-point.x()),abs(this->y()-point.y()),abs(this->z()-point.z()));
 	}
 
 	typedef Point3D<e_uchar8> Point3Duc;

@@ -35,6 +35,8 @@ namespace eva
 
 			void setConnectedEdges(e_uchar8 count, RouteGraphEdge **edges);
 
+			e_double64 distance() const;
+
 			void invalidate() {mType = ROUTEEDGE_INVALID;};
 			void clear();
 

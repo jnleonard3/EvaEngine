@@ -1,4 +1,5 @@
 #include "evaRouteGraphEdge.h"
+#include "evaRouteNode.h"
 
 namespace eva
 {
@@ -23,6 +24,13 @@ namespace eva
 	{
 		mNumEdgesConnected = count;
 		mConnectedEdges = edges;
+	}
+
+	e_double64 RouteGraphEdge::distance() const
+	{
+		if(mTo == 0 || mFrom == 0)
+			return 0.0;
+		return mTo->getPoint().distanceFrom(mFrom->getPoint());
 	}
 
 	void RouteGraphEdge::clear()

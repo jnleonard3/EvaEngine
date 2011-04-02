@@ -33,8 +33,6 @@ namespace eva
 			bool isUnconnected() const;
 			void clear();
 
-			//RouteNode& operator=(RouteNode const& rhs) {; return *this; };
-
 		private:
 			Point3Dd mPoint;
 			e_uchar8 mNumEdgesFrom, mNumEdgesTo;
