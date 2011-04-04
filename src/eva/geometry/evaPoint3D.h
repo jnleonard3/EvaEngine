@@ -22,16 +22,21 @@ namespace eva
 			T& z(){return mZ;};
 			const T& z() const {return mZ;};
 
-			T distanceFrom(const Point3D<T>& point) const;
+			T distance(const Point3D<T>& point) const;
 
 			Point3D<T> difference(const Point3D<T>& point) const;
+
+			bool isEqual(const Point3D<T> &rhs, e_float32 threshold) const;
+			bool isEqual(const Point3D<T> &rhs) const { return this->isEqual(rhs, 0.0f); };
+
+			bool operator==(const Point3D<T> &rhs) const { return this->isEqual(rhs); };
 
 		private:
 			T mX, mY, mZ;
 	};
 
 	template <class T>
-	T Point3D<T>::distanceFrom(const Point3D<T>& point) const
+	T Point3D<T>::distance(const Point3D<T>& point) const
 	{
 		return sqrt(pow(this->x()-point.x(),2)+pow(this->y()-point.y(),2)+pow(this->z()-point.z(),2));
 	}
@@ -40,6 +45,16 @@ namespace eva
 	Point3D<T> Point3D<T>::difference(const Point3D<T>& point) const
 	{
 		return Point3D<T>(abs(this->x()-point.x()),abs(this->y()-point.y()),abs(this->z()-point.z()));
+	}
+
+	template <class T>
+	bool Point3D<T>::isEqual(const Point3D<T> &rhs, e_float32 threshold) const
+	{
+		if(abs(this->x()-rhs.x()) < threshold)
+			if(abs(this->y()-rhs.y()) < threshold)
+				if(abs(this->z()-rhs.z()) < threshold)
+					return true;
+		return false;
 	}
 
 	typedef Point3D<e_uchar8> Point3Duc;

@@ -6,6 +6,9 @@ SET(INCLUDE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 
 SET(TARGET EvaEngineLib)
 
+SET(MATH_HEADERS	math/evaVector3D.h
+	)
+
 SET(STRUCTURES_HEADERS	structures/evaSimpleDynamicArray.h
 					 	structures/evaBlockArray.h
 	)

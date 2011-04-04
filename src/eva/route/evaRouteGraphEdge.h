@@ -2,6 +2,7 @@
 #define EVA_ROUTEGRAPHEDGE_H_
 
 #include "eva/Typedefs.h"
+#include "eva/math/evaVector3D.h"
 
 namespace eva
 {
@@ -36,6 +37,7 @@ namespace eva
 			void setConnectedEdges(e_uchar8 count, RouteGraphEdge **edges);
 
 			e_double64 distance() const;
+			Vector3Dd toVector() const;
 
 			void invalidate() {mType = ROUTEEDGE_INVALID;};
 			void clear();

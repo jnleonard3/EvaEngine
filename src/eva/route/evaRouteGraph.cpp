@@ -115,7 +115,7 @@ namespace eva
 	{
 		bool pathFound = false;
 		std::vector<RouteNodeRecord*> closedSet, openSet;
-		openSet.push_back(new RouteNodeRecord(&nodeFrom,0,0,nodeFrom.getPoint().distanceFrom(nodeTo.getPoint()),0));
+		openSet.push_back(new RouteNodeRecord(&nodeFrom,0,0,nodeFrom.getPoint().distance(nodeTo.getPoint()),0));
 		RouteNodeRecord *currentRecord = openSet.front();
 		while(openSet.size() > 0)
 		{
@@ -180,7 +180,7 @@ namespace eva
 
 					if(!skip)
 					{
-						e_double64 endNodeHeuristic = endNodeRecord->mNode->getPoint().distanceFrom(nodeTo.getPoint());
+						e_double64 endNodeHeuristic = endNodeRecord->mNode->getPoint().distance(nodeTo.getPoint());
 						endNodeRecord->mCostSoFar = endNodeCost;
 						endNodeRecord->mTravelEdge = currentNode.getFromEdge(i);
 						endNodeRecord->mEstimatedTotalCost = endNodeCost + endNodeHeuristic;

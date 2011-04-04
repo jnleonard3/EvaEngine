@@ -193,7 +193,7 @@ namespace eva
 					if(rleaf.isNode)
 					{
 						RouteNode *node = rleaf.data.mNode;
-						if(updateDistance(mQueryPoint.distanceFrom(node->getPoint())))
+						if(updateDistance(mQueryPoint.distance(node->getPoint())))
 							mClosest = node;
 					}
 					return true;
