@@ -22,57 +22,29 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EVA_POINT2D_H_
-#define EVA_POINT2D_H_
+#ifndef FIXEDARRAY_H_
+#define FIXEDARRAY_H_
 
 #include "eva/Typedefs.h"
-#include "eva/structures/evaFixedArray.h"
-#include "math.h"
 
 namespace eva
 {
-	template <class T>
-	class Point2D : public FixedArray<T,2>
+	template <typename T, e_uchar8 size>
+	class FixedArray
 	{
 		public:
-			Point2D(){};
-			Point2D(T x, T y){this->x() = x; this->y() = y;};
+			FixedArray(){};
+			virtual ~FixedArray(){};
 
-			T& x(){return (*this)[0];};
-			const T& x() const {return (*this)[0];};
+			T& operator[] (e_uint32 index) { return this->mElements[index]; };
+			const T& operator[] (e_uint32 index) const { return this->mElements[index]; };
 
-			T& y(){return (*this)[1];};
-			const T& y() const {return (*this)[1];};
+		protected:
+			T& at(e_uint32 index) { return this->mElements[index]; };
 
-			void transpose(T x, T y) { this->x() += x; this->y() += y; };
-			Point2D<T> transpose(T x, T y) const { return Point2D<T>(this->x() + x, this->y() + y); };
-
-			T distance(Point2D<T> point) const
-			{
-				return sqrt(pow(this->x()-point.x(),2)+pow(this->y()-point.y(),2));
-			}
-
-			e_char8 quadrant(Point2D<T> point) const
-			{
-				if(point.x() >= this->x() && point.y() > this->y())
-					return 1;
-				else if(point.x() < this->x() && point.y() >= this->y())
-					return 2;
-				else if(point.x() <= this->x() && point.y() < this->y())
-					return 3;
-				else if(point.x() > this->x() && point.y() <= this->y())
-					return 4;
-				else
-					return 0;
-			}
+		private:
+			T mElements[size];
 	};
-
-	typedef Point2D<e_uchar8> Point2Duc;
-	typedef Point2D<e_char8> Point2Dc;
-	typedef Point2D<e_uint32> Point2Dui;
-	typedef Point2D<e_int32> Point2Di;
-	typedef Point2D<e_float32> Point2Df;
-	typedef Point2D<e_double64> Point2Dd;
 }
 
-#endif
+#endif /* FIXEDARRAY_H_ */
