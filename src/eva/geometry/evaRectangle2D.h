@@ -22,57 +22,57 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EVA_POINT2D_H_
-#define EVA_POINT2D_H_
+#ifndef EVA_RECTANGLE2D_H_
+#define EVA_RECTANGLE2D_H_
 
 #include "eva/Typedefs.h"
-#include "eva/structures/evaFixedArray.h"
-#include "math.h"
+#include "evaPoint2D.h"
+#include "eva/math/evaMathCommon.h"
 
 namespace eva
 {
 	template <class T>
-	class Point2D : public FixedArray<T,2>
+	class Rectangle2D
 	{
 		public:
-			Point2D(){};
-			Point2D(T x, T y){this->x() = x; this->y() = y;};
+			Rectangle2D(){};
+			Rectangle2D(Point2D<T> from, Point2D<T> to):mFrom(from),mTo(to){};
 
-			T& x(){return (*this)[0];};
-			const T& x() const {return (*this)[0];};
+			const Point2D<T>& from() const { return mFrom; };
+			const Point2D<T>& to() const { return mTo; };
 
-			T& y(){return (*this)[1];};
-			const T& y() const {return (*this)[1];};
+			Point2D<T> center() const {return Point2D<T>(((this->to().x()-this->from().x())/2)+this->from().x(), ((this->to().y()-this->from().y())/2)+this->from().y());};
 
-			void transpose(T x, T y) { this->x() += x; this->y() += y; };
-			Point2D<T> transpose(T x, T y) const { return Point2D<T>(this->x() + x, this->y() + y); };
-
-			T distance(Point2D<T> point) const
+			bool intersects(Point2D<T> pt) const
 			{
-				return sqrt(pow(this->x()-point.x(),2)+pow(this->y()-point.y(),2));
+				if(MathCommon::isWithin<T>(mFrom.x(),mTo.x(),pt.x()))
+					if(MathCommon::isWithin<T>(mFrom.y(),mTo.y(),pt.y()))
+						return true;
+				return false;
 			}
 
-			e_char8 quadrant(Point2D<T> point) const
-			{
-				if(point.x() >= this->x() && point.y() > this->y())
-					return 1;
-				else if(point.x() < this->x() && point.y() >= this->y())
-					return 2;
-				else if(point.x() <= this->x() && point.y() < this->y())
-					return 3;
-				else if(point.x() > this->x() && point.y() <= this->y())
-					return 4;
-				else
-					return 0;
-			}
+		private:
+			Point2D<T> mFrom, mTo;
 	};
 
-	typedef Point2D<e_uchar8> Point2Duc;
-	typedef Point2D<e_char8> Point2Dc;
-	typedef Point2D<e_uint32> Point2Dui;
-	typedef Point2D<e_int32> Point2Di;
-	typedef Point2D<e_float32> Point2Df;
-	typedef Point2D<e_double64> Point2Dd;
+	template <class T>
+	class Square2D : public Rectangle2D<T>
+	{
+		public:
+			Square2D():Rectangle2D<T>(){};
+			Square2D(Point2D<T> center, T radius):Rectangle2D<T>(Point2D<T>(center.x()-radius,center.y()-radius),Point2D<T>(center.x()+radius,center.y()+radius)){};
+
+			T radius() const {return (this->to().x()-this->from().x())/2.0;};
+	};
+
+	typedef Square2D<e_uchar8> Square2Duc;
+	typedef Square2D<e_char8> Square2Dc;
+	typedef Square2D<e_uint32> Square2Dui;
+	typedef Square2D<e_int32> Square2Di;
+	typedef Square2D<e_float32> Square2Df;
+	typedef Square2D<e_double64> Square2Dd;
+
 }
 
-#endif
+
+#endif /* EVARECTANGLE2D_H_ */

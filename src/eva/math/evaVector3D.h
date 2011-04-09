@@ -44,6 +44,19 @@ namespace eva
 				return mI == 0 && mJ == 0 && mK == 0;
 			}
 
+			Vector3D<T>& operator+=(const Vector3D<T> &rhs)
+			{
+			    mI += rhs.i();
+			    mJ += rhs.j();
+			    mK += rhs.k();
+			    return *this;
+			}
+
+			const Vector3D<T> operator+(const Vector3D<T> &rhs) const
+			{
+			    return Vector3D<T>(*this) += rhs;
+			}
+
 		private:
 			T mI, mJ, mK;
 	};

@@ -1,3 +1,32 @@
+/*
+ *  Copyright (c) 2011, EvaEngine Project
+ *	All rights reserved.
+ *
+ *	Redistribution and use in source and binary forms, with or without
+ *	modification, are permitted provided that the following conditions are met:
+ *		* Redistributions of source code must retain the above copyright
+ *		  notice, this list of conditions and the following disclaimer.
+ *		* Redistributions in binary form must reproduce the above copyright
+ *		  notice, this list of conditions and the following disclaimer in the
+ *		  documentation and/or other materials provided with the distribution.
+ *
+ *	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *	DISCLAIMED. IN NO EVENT SHALL THE EVAENGINE PROEJCT BE LIABLE FOR ANY
+ *	DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "RoadCommon.h"
+#include "PickHandler.h"
+#include "OsgHelper.h"
+#include "FixedQuadtree.h"
+
 #include "eva/osg/route/RouteGraphVisualizer.h"
 #include "eva/route/evaRouteNode.h"
 #include "eva/route/evaRouteGraph.h"
@@ -15,6 +44,7 @@
 #include <osgViewer/Viewer>
 #include <osg/PositionAttitudeTransform>
 #include <osgGA/TrackballManipulator>
+#include <osgGA/UFOManipulator>
 
 #include <iostream>
 #include <list>
@@ -27,157 +57,6 @@ const double ROAD_WIDTH = 3.0;
 void printPoint(eva::Point3Dd point)
 {
 	std::cout << point.x() << "," << point.y() << "," << point.z() << "\n";
-}
-
-struct Road
-{
-	Road(std::list<eva::RouteNode*> list):nodes(list){};
-	std::list<eva::RouteNode*> nodes;
-};
-
-struct RoadIntersection
-{
-	RoadIntersection(Road *road, eva::Point3Dd pt):intersectedWith(road),intersectionPoint(pt){};
-	Road *intersectedWith;
-	eva::Point3Dd intersectionPoint;
-};
-
-void addRoad(eva::Point3Dd start, eva::Point3Dd end, std::vector<Road> &roads, eva::RouteGraph &graph)
-{
-	eva::RouteNode &startNode = graph.createNode(start);
-	eva::RouteNode &endNode = graph.createNode(end);
-	eva::Line3Dd newRoadLine(startNode.getPoint(),endNode.getPoint());
-	std::list<eva::RouteNode*> roadNodes;
-	roadNodes.push_back(&startNode);
-
-	std::vector<RoadIntersection> intersections;
-	for(std::vector<Road>::iterator i = roads.begin(); i != roads.end(); ++i)
-	{
-		eva::Line3Dd roadLine(i->nodes.front()->getPoint(),i->nodes.back()->getPoint());
-		eva::Point3Dd intersection;
-		if(newRoadLine.intersects(roadLine,intersection))
-			intersections.push_back(RoadIntersection(&*i,intersection));
-	}
-
-	for(e_uint32 i = 0; i < intersections.size(); ++i)
-	{
-		e_double64 minDist = 1000000.0;
-		e_uint32 index = 0;
-		for(e_uint32 j = i; j < intersections.size(); ++j)
-		{
-			e_double64 dist = intersections[j].intersectionPoint.distance(startNode.getPoint());
-			if(dist < minDist)
-			{
-				index = j;
-				minDist = dist;
-			}
-		}
-		RoadIntersection temp = intersections[i];
-		intersections[i] = intersections[index];
-		intersections[index] = temp;
-	}
-
-	for(std::vector<RoadIntersection>::iterator i = intersections.begin(); i != intersections.end(); ++i)
-	{
-		eva::Point3Dd intersectionPoint = i->intersectionPoint;
-		eva::RouteNode &intersectionNode = graph.createNode(intersectionPoint);
-		for(std::list<eva::RouteNode*>::iterator j = i->intersectedWith->nodes.begin(); j != i->intersectedWith->nodes.end(); ++j)
-		{
-			std::list<eva::RouteNode*>::iterator next = j;
-			++next;
-			if(next != i->intersectedWith->nodes.end())
-			{
-				eva::Line3Dd roadSegmentLine((**j).getPoint(), (**next).getPoint());
-				if(newRoadLine.intersects(roadSegmentLine))
-				{
-					graph.disconnectNodes((**j),(**next));
-					graph.connectNodes((**j),intersectionNode);
-					graph.connectNodes(intersectionNode,(**next));
-					i->intersectedWith->nodes.insert(next,&intersectionNode);
-					roadNodes.push_back(&intersectionNode);
-					break;
-				}
-			}
-			else
-				roadNodes.push_back(&intersectionNode);
-		}
-	}
-	roadNodes.push_back(&endNode);
-
-	for(std::list<eva::RouteNode*>::iterator i = roadNodes.begin(); i != roadNodes.end(); ++i)
-	{
-		std::list<eva::RouteNode*>::iterator next = i;
-		++next;
-		if(next != roadNodes.end())
-			graph.connectNodes(**i,**next);
-	}
-
-	roads.push_back(Road(roadNodes));
-}
-
-class PickHandler : public osgGA::GUIEventHandler
-{
-	public:
-		PickHandler(osg::Group *root, eva::RouteGraph &graph)
-		:mGraph(graph),mRoot(root),mClicked(0),firstNode(0),secondNode(0){};
-		virtual ~PickHandler(){};
-
-		bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
-		virtual void pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
-	private:
-		eva::RouteGraph &mGraph;
-		osg::Group *mRoot,*mClicked;
-		eva::RouteNode *firstNode, *secondNode;
-};
-
-bool PickHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
-{
-    switch(ea.getEventType())
-    {
-        case(osgGA::GUIEventAdapter::PUSH):
-        {
-        	if(ea.getButton() == osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
-        	{
-				osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
-				if (view) pick(view,ea);
-				return false;
-        	}
-        }
-        default:
-            return false;
-    }
-}
-
-void PickHandler::pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea)
-{
-    osgUtil::LineSegmentIntersector::Intersections intersections;
-
-    float x = ea.getX();
-    float y = ea.getY();
-
-    if (view->computeIntersections(x,y,intersections))
-    {
-    	if(intersections.begin() != intersections.end())
-        {
-    		osgUtil::LineSegmentIntersector::Intersections::iterator hitr = intersections.begin();
-
-    		mRoot->removeChild(mClicked);
-
-    		firstNode = secondNode;
-    		secondNode = mGraph.findClosest(hitr->getWorldIntersectPoint().x(),hitr->getWorldIntersectPoint().y(),hitr->getWorldIntersectPoint().z());
-    		if(firstNode && secondNode)
-    		{
-    			std::list<eva::RoutePathElement> pathResults;
-    			mGraph.findPath(*firstNode,*secondNode,pathResults);
-
-				mClicked = new osg::Group;
-				osg::Group *newNodeDrawn = eva::RouteGraphVisualizer::drawRoutePath(pathResults,5.0);
-				mClicked->addChild(newNodeDrawn);
-
-				mRoot->addChild(mClicked);
-    		}
-        }
-    }
 }
 
 osg::Group* drawRoads(std::vector<Road>& roads)
@@ -202,12 +81,6 @@ osg::Group* drawRoads(std::vector<Road>& roads)
 	colors->push_back(osg::Vec4(0.7f, 0.7f, 0.7f, 1.0f));
 	colors->push_back(osg::Vec4(0.7f, 0.7f, 0.7f, 1.0f));
 	colors->push_back(osg::Vec4(0.7f, 0.7f, 0.7f, 1.0f));
-
-	osg::Vec2Array* texcoords = new osg::Vec2Array(5);
-	(*texcoords)[0].set(0.0f,0.0f);
-	(*texcoords)[1].set(0.0f,1.0f);
-	(*texcoords)[2].set(1.0f,0.0f);
-	(*texcoords)[3].set(1.0f,1.0f);
 
 	osg::StateSet* state = new osg::StateSet();
 	state->setTextureAttributeAndModes(0,asphaltTexture,osg::StateAttribute::ON);
@@ -239,6 +112,12 @@ osg::Group* drawRoads(std::vector<Road>& roads)
 				roadVertices->push_back(osg::Vec3(end.x()+perp.i(), end.y()+perp.j(), end.z()+perp.k())); // back right
 				roadVertices->push_back(osg::Vec3(end.x()-perp.i(), end.y()-perp.j(), end.z()-perp.k())); // back left
 
+				osg::Vec2Array* texcoords = new osg::Vec2Array(4);
+				(*texcoords)[0].set(0.0f,0.0f);
+				(*texcoords)[1].set(0.0f,1.0f);
+				(*texcoords)[2].set(1.0f,0.0f);
+				(*texcoords)[3].set(1.0f,1.0f);
+
 				roadGeometry->setVertexArray(roadVertices);
 				roadGeometry->addPrimitiveSet(roadElements);
 				roadGeometry->setColorArray(colors);
@@ -246,12 +125,10 @@ osg::Group* drawRoads(std::vector<Road>& roads)
 				roadGeometry->setTexCoordArray(0,texcoords);
 
 				roadGeode->setStateSet(state);
-
 				root->addChild(roadGeode);
 			}
 		}
 	}
-
 	return root;
 }
 
@@ -259,40 +136,79 @@ int main(int argc, char** argv)
 {
 	eva::RouteGraph graph(8,1);
 	std::vector<Road> listOfRoads;
-	bool flip = true, flipt = true;
+	bool flipOne = true, flipTwo = false, flipThree = true;;
 	e_uint32 numOfRoads = 20;
-	e_double64 spacing = 120.0;
-	e_double64 max = spacing*numOfRoads+5.0;
-	for(e_double64 x = 5.0; x <= max; x += spacing)
+	e_double64 extra = 10.0;
+	e_double64 spacing = 50.0;
+	e_double64 max = spacing*numOfRoads+extra;
+	for(e_double64 x = extra; x <= max; x += spacing)
 	{
-		if(flipt)
-			addRoad(eva::Point3Dd(x,0.0,0.0),eva::Point3Dd(x,max+5.0,0.0),listOfRoads,graph);
+		if(flipTwo)
+		{
+			RoadCommon::addRoad(eva::Point3Dd(x,0.0,0.0),eva::Point3Dd(x,max+extra,0.0),listOfRoads,graph);
+			if(flipThree)
+				RoadCommon::addRoad(eva::Point3Dd(x-ROAD_WIDTH,max+extra,0.0),eva::Point3Dd(x-ROAD_WIDTH,0.0,0.0),listOfRoads,graph);
+		}
 		else
-			addRoad(eva::Point3Dd(x,max+5.0,0.0),eva::Point3Dd(x,0.0,0.0),listOfRoads,graph);
+		{
+			RoadCommon::addRoad(eva::Point3Dd(x,max+extra,0.0),eva::Point3Dd(x,0.0,0.0),listOfRoads,graph);
+			if(flipThree)
+				RoadCommon::addRoad(eva::Point3Dd(x-ROAD_WIDTH,0.0,0.0),eva::Point3Dd(x-ROAD_WIDTH,max+extra,0.0),listOfRoads,graph);
+		}
 
-		if(flip)
-			addRoad(eva::Point3Dd(max+5,x,0.0),eva::Point3Dd(0.0,x,0.0),listOfRoads,graph);
+		if(flipOne)
+		{
+			RoadCommon::addRoad(eva::Point3Dd(max+extra,x,0.0),eva::Point3Dd(0.0,x,0.0),listOfRoads,graph);
+			if(flipThree)
+				RoadCommon::addRoad(eva::Point3Dd(0.0,x+ROAD_WIDTH,0.0),eva::Point3Dd(max+extra,x+ROAD_WIDTH,0.0),listOfRoads,graph);
+		}
 		else
-			addRoad(eva::Point3Dd(0.0,x,0.0),eva::Point3Dd(max+5,x,0.0),listOfRoads,graph);
+		{
+			RoadCommon::addRoad(eva::Point3Dd(0.0,x,0.0),eva::Point3Dd(max+extra,x,0.0),listOfRoads,graph);
+			if(flipThree)
+				RoadCommon::addRoad(eva::Point3Dd(max+extra,x+ROAD_WIDTH,0.0),eva::Point3Dd(0.0,x+ROAD_WIDTH,0.0),listOfRoads,graph);
+		}
 
-		flip = !flip;
-		if(flip)
-			flipt = !flipt;
+		flipThree = flipOne & flipTwo;
+		flipOne = !flipOne;
+		if(flipOne)
+			flipTwo = !flipTwo;
 	}
-
-	//addRoad(eva::Point3Dd(2.0,4.0,0.0),eva::Point3Dd(89.0,72.0,0.0),listOfRoads,graph);
 
 	osg::Group* root = new osg::Group();
 
-	//osg::Group* graphRoot = eva::RouteGraphVisualizer::drawRouteGraph(graph);
-	//root->addChild(graphRoot);
+	eva::Rectangle2D<e_double64> base(eva::Point2Dd(-extra,-extra),eva::Point2Dd(max+(extra*2.0),max+(extra*2.0)));
+	osg::Group* grassBase = OsgHelper::drawBase(eva::Point3Dd(-extra,-extra,0.0),eva::Point3Dd(max+(extra*2.0),max+(extra*2.0),0.0),-0.1,eva::Point3Dd(39.0/255.0,115.0/255.0,31.0/255.0));
+	root->addChild(grassBase);
+
+	osg::Group* graphRoot = eva::RouteGraphVisualizer::drawRouteGraph(graph);
+	graphRoot->setNodeMask(0);
+	root->addChild(graphRoot);
 
 	osg::Group* roadsRoot = drawRoads(listOfRoads);
 	root->addChild(roadsRoot);
 
+	FixedQuadtree<int> quadtree(eva::Square2Dd(base.center(),(max+(extra*2.0)+extra)/2.0),10);
+
+	for(std::vector<Road>::iterator j = listOfRoads.begin(); j != listOfRoads.end(); ++j)
+		for(std::list<eva::RouteNode*>::iterator i = j->nodes.begin(); i != j->nodes.end(); ++i)
+			quadtree.insert(0,eva::Point2Dd((*i)->getPoint().x(),(*i)->getPoint().y()));
+
+	quadtree.insert(new int(8),eva::Point2Dd(50.0,50.0));
+
+	std::vector<QuadAppearance> quads = quadtree.getAppearance();
+
+	osg::Group* quadsRoot = OsgHelper::drawQuadtree(quads);
+	root->addChild(quadsRoot);
+	quadsRoot->setNodeMask(0);
+
+
+	BasicQuadtreeLineIntersectVisitor<int> visitor;
+	bool result = quadtree.lineOfSightQuery< BasicQuadtreeLineIntersectVisitor<int> >(eva::Line2Dd(500.0,500.0,550.0,550),visitor);
+
 	root->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 	osgViewer::Viewer viewer;
-	viewer.addEventHandler(new PickHandler(root,graph));
+	viewer.addEventHandler(new PickHandler(root,graph,graphRoot));
 	viewer.setSceneData(root);
 	viewer.run();
 
