@@ -36,9 +36,10 @@
 
 struct QuadAppearance
 {
-	QuadAppearance(eva::Square2Dd quad, e_uchar8 level):mQuad(quad),mLevel(level){};
+	QuadAppearance(eva::Square2Dd quad, e_uchar8 level,bool hasData):mQuad(quad),mLevel(level),mHasData(hasData){};
 	eva::Square2Dd mQuad;
 	e_uchar8 mLevel;
+	bool mHasData;
 };
 
 template <typename T>
@@ -58,14 +59,20 @@ class FixedQuadtree
 		virtual ~FixedQuadtree(){};
 
 		bool insert(T* data, eva::Point2Dd pos)
-		{return insert(data,pos,mRoot);};
+		{ return insert(data,pos,mRoot); };
+
+		bool insert(T* data, eva::Rectangle2Dd rect)
+		{ return insert(data,rect,mRoot); };
 
 		bool move(T* data, eva::Point2Dd oldPos, eva::Point2Dd newPos)
 		{ return move(data,oldPos,newPos,mRoot); };
 
+		bool move(T* data, eva::Rectangle2Dd oldRect, eva::Rectangle2Dd newRect)
+		{ return move(data,oldRect,newRect,mRoot); };
+
 		template <typename Visitor>
 		bool lineOfSightQuery(eva::Line2Dd query, Visitor &visit) const
-		{ if(mRoot && query.intersects(mRoot->mQuad)) return lineOfSightQuery<Visitor>(query,visit,mRoot); return false; }
+		{ if(mRoot && query.intersects(mRoot->mQuad)) return lineOfSightQuery<Visitor>(query,visit,mRoot); return false; };
 
 		std::vector<QuadAppearance> getAppearance() const
 		{
@@ -122,6 +129,38 @@ class FixedQuadtree
 			return false;
 		}
 
+		bool insert(T* data, eva::Rectangle2Dd rect, Quad *quad)
+		{
+			if(quad && rect.intersects(quad->mQuad))
+			{
+				e_double64 radius = quad->mQuad.radius();
+				if(radius < mMinimumRadius)
+				{
+					if(data)
+						quad->mItems.push_back(data);
+					return true;
+				}
+
+				const eva::Point2Dd &center = quad->mQuad.center();
+				if(!quad->mTR)
+				{
+					e_double64 halfRadius = radius/2.0;
+					quad->mTR = new Quad(eva::Square2Dd(center.transpose(halfRadius,halfRadius),halfRadius));
+					quad->mBR = new Quad(eva::Square2Dd(center.transpose(halfRadius,-halfRadius),halfRadius));
+					quad->mBL = new Quad(eva::Square2Dd(center.transpose(-halfRadius,-halfRadius),halfRadius));
+					quad->mTL = new Quad(eva::Square2Dd(center.transpose(-halfRadius,halfRadius),halfRadius));
+				}
+
+				bool result = false;
+				result |= this->insert(data,rect,quad->mTR);
+				result |= this->insert(data,rect,quad->mTL);
+				result |= this->insert(data,rect,quad->mBL);
+				result |= this->insert(data,rect,quad->mBR);
+				return result;
+			}
+			return false;
+		}
+
 		bool move(T* data, eva::Point2Dd oldPos, eva::Point2Dd newPos, Quad *quad)
 		{
 			if(quad && quad->mQuad.intersects(oldPos))
@@ -141,8 +180,7 @@ class FixedQuadtree
 						case 4:
 							result = this->move(data,oldPos,newPos,quad->mBR); break;
 					}
-					if(result)
-						return true;
+					return result;
 				}
 				else
 				{
@@ -173,6 +211,49 @@ class FixedQuadtree
 					else
 					{
 						return this->insert(data,newPos,quad);
+					}
+				}
+			}
+			return false;
+		};
+
+		bool move(T* data, eva::Rectangle2Dd oldRect, eva::Rectangle2Dd newRect, Quad* quad)
+		{
+			if(quad)
+			{
+				bool intersectsOldRect = quad->mQuad.intersects(oldRect), intersectsNewRect = quad->mQuad.intersects(newRect);
+				if(intersectsOldRect || intersectsNewRect)
+				{
+					if(quad->mTR)
+					{
+						bool result = false;
+						result |= this->move(data,oldRect,newRect,quad->mTR);
+						result |= this->move(data,oldRect,newRect,quad->mTL);
+						result |= this->move(data,oldRect,newRect,quad->mBL);
+						result |= this->move(data,oldRect,newRect,quad->mBR);
+						return result;
+					}
+					else
+					{
+						if(intersectsOldRect && !intersectsNewRect)
+						{
+							for(typename std::list<T*>::iterator i = quad->mItems.begin(); i != quad->mItems.end(); ++i)
+								if((*i) == data)
+								{
+									quad->mItems.erase(i);
+									break;
+								}
+							return true;
+						}
+						else if(!intersectsOldRect && intersectsNewRect)
+						{
+							return this->insert(data,newRect,quad);
+						}
+						else if(intersectsOldRect && intersectsNewRect)
+						{
+							return true;
+						}
+						return false;
 					}
 				}
 			}
@@ -264,23 +345,29 @@ class FixedQuadtree
 				}
 			}
 			return false;
-		}
+		};
 
 		void getAppearance(std::vector<QuadAppearance> &toFill, Quad* quad, e_uchar8 level) const
 		{
 			if(quad)
 			{
-				toFill.push_back(QuadAppearance(quad->mQuad,level));
-
 				if(quad->mTR)
 				{
+					toFill.push_back(QuadAppearance(quad->mQuad,level,false));
 					getAppearance(toFill,quad->mTR,level+1);
 					getAppearance(toFill,quad->mBR,level+1);
 					getAppearance(toFill,quad->mBL,level+1);
 					getAppearance(toFill,quad->mTL,level+1);
 				}
+				else
+				{
+					if(quad->mItems.size() > 0)
+						toFill.push_back(QuadAppearance(quad->mQuad,level,true));
+					else
+						toFill.push_back(QuadAppearance(quad->mQuad,level,false));
+				}
 			}
-		}
+		};
 
 		e_float32 mMinimumRadius;
 		Quad *mRoot;

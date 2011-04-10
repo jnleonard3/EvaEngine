@@ -29,6 +29,8 @@
 #include "evaPoint2D.h"
 #include "eva/math/evaMathCommon.h"
 
+#include <iostream>
+
 namespace eva
 {
 	template <class T>
@@ -36,6 +38,7 @@ namespace eva
 	{
 		public:
 			Rectangle2D(){};
+			Rectangle2D(T x1, T y1, T x2, T y2):mFrom(x1,y1),mTo(x2,y2){};
 			Rectangle2D(Point2D<T> from, Point2D<T> to):mFrom(from),mTo(to){};
 
 			const Point2D<T>& from() const { return mFrom; };
@@ -51,9 +54,27 @@ namespace eva
 				return false;
 			}
 
+			bool intersects(Rectangle2D<T> rect) const
+			{
+				Point2D<T> bR = Point2D<T>(rect.to().x(),rect.from().y()), tL = Point2D<T>(rect.from().x(),rect.to().y());
+				if(this->intersects(bR) || this->intersects(rect.from()) || this->intersects(tL) || this->intersects(rect.to()))
+					return true;
+				bR = Point2D<T>(this->to().x(),this->from().y()), tL = Point2D<T>(this->from().x(),this->to().y());
+				if(rect.intersects(bR) || rect.intersects(this->from()) || rect.intersects(tL) || rect.intersects(this->to()))
+					return true;
+				return false;
+			}
+
 		private:
 			Point2D<T> mFrom, mTo;
 	};
+
+	typedef Rectangle2D<e_uchar8> Rectangle2Duc;
+	typedef Rectangle2D<e_char8> Rectangle2Dc;
+	typedef Rectangle2D<e_uint32> Rectangle2Dui;
+	typedef Rectangle2D<e_int32> Rectangle2Di;
+	typedef Rectangle2D<e_float32> Rectangle2Df;
+	typedef Rectangle2D<e_double64> Rectangle2Dd;
 
 	template <class T>
 	class Square2D : public Rectangle2D<T>
@@ -71,8 +92,5 @@ namespace eva
 	typedef Square2D<e_int32> Square2Di;
 	typedef Square2D<e_float32> Square2Df;
 	typedef Square2D<e_double64> Square2Dd;
-
 }
-
-
 #endif /* EVARECTANGLE2D_H_ */
