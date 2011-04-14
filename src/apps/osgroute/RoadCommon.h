@@ -1,7 +1,7 @@
 #ifndef ROADCOMMON_H_
 #define ROADCOMMON_H_
 
-#include "eva/geometry/evaPoint3D.h"
+#include "eva/geometry/basic/3d/evaPoint3D.h"
 
 #include <vector>
 #include <list>

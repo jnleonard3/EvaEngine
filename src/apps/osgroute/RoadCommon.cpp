@@ -4,7 +4,8 @@
 #include "eva/route/evaRouteGraph.h"
 #include "eva/math/evaVector3D.h"
 #include "eva/math/evaMathCommon.h"
-#include "eva/geometry/evaLine3D.h"
+#include "eva/geometry/basic/3d/evaLine3D.h"
+#include "eva/geometry/intersection/Intersection3D.h"
 
 void RoadCommon::addRoad(eva::Point3Dd start, eva::Point3Dd end, std::vector<Road> &roads, eva::RouteGraph &graph)
 {
@@ -19,7 +20,7 @@ void RoadCommon::addRoad(eva::Point3Dd start, eva::Point3Dd end, std::vector<Roa
 	{
 		eva::Line3Dd roadLine(i->nodes.front()->getPoint(),i->nodes.back()->getPoint());
 		eva::Point3Dd intersection;
-		if(newRoadLine.intersects(roadLine,intersection))
+		if(eva::Intersection3D::Intersection<e_double64>(newRoadLine,roadLine,intersection))
 			intersections.push_back(RoadIntersection(&*i,intersection));
 	}
 
@@ -52,7 +53,7 @@ void RoadCommon::addRoad(eva::Point3Dd start, eva::Point3Dd end, std::vector<Roa
 			if(next != i->intersectedWith->nodes.end())
 			{
 				eva::Line3Dd roadSegmentLine((**j).getPoint(), (**next).getPoint());
-				if(newRoadLine.intersects(roadSegmentLine))
+				if(eva::Intersection3D::Intersects<e_double64>(newRoadLine,roadSegmentLine))
 				{
 					graph.disconnectNodes((**j),(**next));
 					graph.connectNodes((**j),intersectionNode);

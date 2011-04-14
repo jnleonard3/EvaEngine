@@ -22,61 +22,60 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTELLIGENTAGENTMANAGER_H_
-#define INTELLIGENTAGENTMANAGER_H_
+#ifndef EVA_VECTOR2D_H_
+#define EVA_VECTOR2D_H_
 
-#include "RoadCommon.h"
-#include "FixedQuadtree.h"
-#include "IntelligentAgent.h"
+#include "eva/Typedefs.h"
+#include "eva/structures/evaFixedArray.h"
+#include "math.h"
 
-#include "eva/geometry/evaPoint3D.h"
-#include "eva/math/evaVector3D.h"
-
-#include <list>
-
-enum QuadtreeElementTypes
+namespace eva
 {
-	INVALID_QUADTREEELEM,
-	INTELLIGENTAGENT_QUADTREEELEM,
-};
-
-union QuadtreeElement
-{
-	IntelligentAgent *mAgent;
-};
-
-struct QuadtreeData
-{
-	QuadtreeData():mType(INVALID_QUADTREEELEM){};
-	QuadtreeData(e_uchar8 type):mType(type){};
-	e_uchar8 mType;
-	QuadtreeElement mElement;
-};
-
-template <typename T>
-struct IntelligentAgentQuadtreeVisitor
-{
-	eva::Point2Dd hitPoint;
-	bool operator()(const T* const node)
+	template <class T>
+	class Vector2D : public FixedArray<T,2>
 	{
-		//const QuadtreeData* const data = node;
-		return true;
-	}
-};
+		public:
+			Vector2D(){};
+			Vector2D(T x, T y){this->i() = x; this->j() = y;};
+			Vector2D(T xF, T yF, T xT, T yT){this->i() = xT - xF; this->j() = yT - yF;};
 
-class IntelligentAgentManager
-{
-	public:
-		IntelligentAgentManager(eva::Square2Dd effectiveArea)
-		:DEFAULT_AGENT(*this),mAgentVector(0,DEFAULT_AGENT),mQuadtree(effectiveArea,15){};
-		virtual ~IntelligentAgentManager(){};
+			T& i(){return (*this)[0];};
+			const T& i() const {return (*this)[0];};
 
-		bool losQuery(eva::Line2Dd line, eva::Point2Dd &hit) const;
+			T& j(){return (*this)[1];};
+			const T& j() const {return (*this)[1];};
 
-	private:
-		const IntelligentAgent DEFAULT_AGENT;
-		std::vector<IntelligentAgent> mAgentVector;
-		FixedQuadtree<QuadtreeData> mQuadtree;
-};
+			Vector2D<T> rotate(e_float32 radians) const
+			{
+				return Vector2D<T>(this->x()*cos(radians)-this->y()*sin(radians),this->x()*sin(radians)+this->y()*cos(radians));
+			}
 
-#endif /* INTELLIGENTAGENT_H_ */
+			T magnitude() const
+			{
+				return sqrt(pow(this->i(),2)+pow(this->j(),2));
+			}
+
+			Vector2D<T>& operator*=(e_int32 scale)
+			{
+				this->i() *= scale;
+				this->j() *= scale;
+				return *this;
+			}
+
+			const Vector2D<T> operator*(e_int32 scale) const
+			{
+				Vector2D<T> result = *this;
+				result *= scale;
+				return result;
+			}
+	};
+
+	typedef Vector2D<e_uchar8> Vector2Duc;
+	typedef Vector2D<e_char8> Vector2Dc;
+	typedef Vector2D<e_uint32> Vector2Dui;
+	typedef Vector2D<e_int32> Vector2Di;
+	typedef Vector2D<e_float32> Vector2Df;
+	typedef Vector2D<e_double64> Vector2Dd;
+}
+
+#endif

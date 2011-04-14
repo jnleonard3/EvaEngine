@@ -2,7 +2,7 @@
 #define EVA_ROUTEGRAPH_H_
 
 #include "eva/Typedefs.h"
-#include "eva/geometry/evaPoint3D.h"
+#include "eva/geometry/basic/3d/evaPoint3D.h"
 #include "eva/structures/evaSimpleDynamicArray.h"
 #include "eva/route/evaRouteGraphEdge.h"
 #include "eva/route/evaRouteNode.h"

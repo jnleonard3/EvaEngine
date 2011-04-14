@@ -22,61 +22,28 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTELLIGENTAGENTMANAGER_H_
-#define INTELLIGENTAGENTMANAGER_H_
+#ifndef EVA_RECTANGLE_H_
+#define EVA_RECTANGLE_H_
 
-#include "RoadCommon.h"
-#include "FixedQuadtree.h"
-#include "IntelligentAgent.h"
+#include "eva/Typedefs.h"
+#include "eva/geometry/basic/2d/evaTetragon.h"
 
-#include "eva/geometry/evaPoint3D.h"
-#include "eva/math/evaVector3D.h"
-
-#include <list>
-
-enum QuadtreeElementTypes
+namespace eva
 {
-	INVALID_QUADTREEELEM,
-	INTELLIGENTAGENT_QUADTREEELEM,
-};
-
-union QuadtreeElement
-{
-	IntelligentAgent *mAgent;
-};
-
-struct QuadtreeData
-{
-	QuadtreeData():mType(INVALID_QUADTREEELEM){};
-	QuadtreeData(e_uchar8 type):mType(type){};
-	e_uchar8 mType;
-	QuadtreeElement mElement;
-};
-
-template <typename T>
-struct IntelligentAgentQuadtreeVisitor
-{
-	eva::Point2Dd hitPoint;
-	bool operator()(const T* const node)
+	template <class T>
+	class Rectangle : public Tetragon<T>
 	{
-		//const QuadtreeData* const data = node;
-		return true;
-	}
-};
+		public:
+			Rectangle(){};
+			Rectangle(T fX, T fY, T tX, T tY):Tetragon<T>(Point2D<T>(fX,fY),Point2D<T>(tX,tY)){};
+			Rectangle(const Point2D<T>& from, const Point2D<T>& to):Tetragon<T>(from,to){};
+	};
 
-class IntelligentAgentManager
-{
-	public:
-		IntelligentAgentManager(eva::Square2Dd effectiveArea)
-		:DEFAULT_AGENT(*this),mAgentVector(0,DEFAULT_AGENT),mQuadtree(effectiveArea,15){};
-		virtual ~IntelligentAgentManager(){};
-
-		bool losQuery(eva::Line2Dd line, eva::Point2Dd &hit) const;
-
-	private:
-		const IntelligentAgent DEFAULT_AGENT;
-		std::vector<IntelligentAgent> mAgentVector;
-		FixedQuadtree<QuadtreeData> mQuadtree;
-};
-
-#endif /* INTELLIGENTAGENT_H_ */
+	typedef Rectangle<e_uchar8> Rectangleuc;
+	typedef Rectangle<e_char8> Rectanglec;
+	typedef Rectangle<e_uint32> Rectangleui;
+	typedef Rectangle<e_int32> Rectanglei;
+	typedef Rectangle<e_float32> Rectanglef;
+	typedef Rectangle<e_double64> Rectangled;
+}
+#endif /* EVARECTANGLE2D_H_ */

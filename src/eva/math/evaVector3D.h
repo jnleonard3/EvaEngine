@@ -2,7 +2,7 @@
 #define EVA_VECTOR3D_H_
 
 #include "eva/Typedefs.h"
-#include "eva/geometry/evaPoint3D.h"
+#include "eva/geometry/basic/3d/evaPoint3D.h"
 #include "math.h"
 
 namespace eva

@@ -22,61 +22,30 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTELLIGENTAGENTMANAGER_H_
-#define INTELLIGENTAGENTMANAGER_H_
+#ifndef EVA_SQUARE_H_
+#define EVA_SQUARE_H_
 
-#include "RoadCommon.h"
-#include "FixedQuadtree.h"
-#include "IntelligentAgent.h"
+#include "eva/Typedefs.h"
+#include "eva/geometry/basic/2d/evaTetragon.h"
 
-#include "eva/geometry/evaPoint3D.h"
-#include "eva/math/evaVector3D.h"
-
-#include <list>
-
-enum QuadtreeElementTypes
+namespace eva
 {
-	INVALID_QUADTREEELEM,
-	INTELLIGENTAGENT_QUADTREEELEM,
-};
-
-union QuadtreeElement
-{
-	IntelligentAgent *mAgent;
-};
-
-struct QuadtreeData
-{
-	QuadtreeData():mType(INVALID_QUADTREEELEM){};
-	QuadtreeData(e_uchar8 type):mType(type){};
-	e_uchar8 mType;
-	QuadtreeElement mElement;
-};
-
-template <typename T>
-struct IntelligentAgentQuadtreeVisitor
-{
-	eva::Point2Dd hitPoint;
-	bool operator()(const T* const node)
+	template <class T>
+	class Square : public Tetragon<T>
 	{
-		//const QuadtreeData* const data = node;
-		return true;
-	}
-};
+		public:
+			Square():Tetragon<T>(){};
+			Square(Point2D<T> center, T radius):Tetragon<T>(center,radius){};
 
-class IntelligentAgentManager
-{
-	public:
-		IntelligentAgentManager(eva::Square2Dd effectiveArea)
-		:DEFAULT_AGENT(*this),mAgentVector(0,DEFAULT_AGENT),mQuadtree(effectiveArea,15){};
-		virtual ~IntelligentAgentManager(){};
+			T radius() const {return this->getVectors()[0].i();};
+	};
 
-		bool losQuery(eva::Line2Dd line, eva::Point2Dd &hit) const;
+	typedef Square<e_uchar8> Squareuc;
+	typedef Square<e_char8> Squarec;
+	typedef Square<e_uint32> Squareui;
+	typedef Square<e_int32> Squarei;
+	typedef Square<e_float32> Squaref;
+	typedef Square<e_double64> Squared;
+}
 
-	private:
-		const IntelligentAgent DEFAULT_AGENT;
-		std::vector<IntelligentAgent> mAgentVector;
-		FixedQuadtree<QuadtreeData> mQuadtree;
-};
-
-#endif /* INTELLIGENTAGENT_H_ */
+#endif

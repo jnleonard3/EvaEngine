@@ -13,8 +13,7 @@ SET(STRUCTURES_HEADERS	structures/evaSimpleDynamicArray.h
 					 	structures/evaBlockArray.h
 	)
 	
-SET(GEOMETRY_HEADERS	geometry/evaPoint2D.h
-						geometry/evaPoint3D.h
+SET(GEOMETRY_HEADERS	
 	)
 
 SET(ROUTE_SOURCE	route/evaRouteGraphEdge.cpp

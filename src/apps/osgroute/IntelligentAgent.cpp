@@ -22,61 +22,27 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTELLIGENTAGENTMANAGER_H_
-#define INTELLIGENTAGENTMANAGER_H_
-
-#include "RoadCommon.h"
-#include "FixedQuadtree.h"
 #include "IntelligentAgent.h"
+#include "IntelligentAgentManager.h"
 
-#include "eva/geometry/evaPoint3D.h"
-#include "eva/math/evaVector3D.h"
-
-#include <list>
-
-enum QuadtreeElementTypes
+void IntelligentAgent::act()
 {
-	INVALID_QUADTREEELEM,
-	INTELLIGENTAGENT_QUADTREEELEM,
-};
+	// If we are waiting, remain waiting until orders come in
+	if(mState == STATE_WAITING)
+		return;
 
-union QuadtreeElement
+	// Do a Line Of Sight Check
+
+}
+
+void IntelligentAgent::updatePosition(e_float32 secondsElapsed)
 {
-	IntelligentAgent *mAgent;
-};
+	mPosition.transpose(mVelocityVector.i(),mVelocityVector.j(),mVelocityVector.k());
+	eva::Vector3Dd totalAcceleration = mAccelerationVector;
+	mVelocityVector += totalAcceleration;
+}
 
-struct QuadtreeData
+bool IntelligentAgent::losQuery(eva::Line2Dd line, eva::Point2Dd &hit) const
 {
-	QuadtreeData():mType(INVALID_QUADTREEELEM){};
-	QuadtreeData(e_uchar8 type):mType(type){};
-	e_uchar8 mType;
-	QuadtreeElement mElement;
+	return this->getManager().losQuery(line, hit);
 };
-
-template <typename T>
-struct IntelligentAgentQuadtreeVisitor
-{
-	eva::Point2Dd hitPoint;
-	bool operator()(const T* const node)
-	{
-		//const QuadtreeData* const data = node;
-		return true;
-	}
-};
-
-class IntelligentAgentManager
-{
-	public:
-		IntelligentAgentManager(eva::Square2Dd effectiveArea)
-		:DEFAULT_AGENT(*this),mAgentVector(0,DEFAULT_AGENT),mQuadtree(effectiveArea,15){};
-		virtual ~IntelligentAgentManager(){};
-
-		bool losQuery(eva::Line2Dd line, eva::Point2Dd &hit) const;
-
-	private:
-		const IntelligentAgent DEFAULT_AGENT;
-		std::vector<IntelligentAgent> mAgentVector;
-		FixedQuadtree<QuadtreeData> mQuadtree;
-};
-
-#endif /* INTELLIGENTAGENT_H_ */

@@ -22,57 +22,45 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EVA_POINT2D_H_
-#define EVA_POINT2D_H_
+#ifndef EVA_LINE2D_H_
+#define EVA_LINE2D_H_
 
 #include "eva/Typedefs.h"
-#include "eva/structures/evaFixedArray.h"
+#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/math/evaVector2D.h"
+#include "eva/math/evaMathCommon.h"
 #include "math.h"
 
 namespace eva
 {
 	template <class T>
-	class Point2D : public FixedArray<T,2>
+	class Line2D
 	{
 		public:
-			Point2D(){};
-			Point2D(T x, T y){this->x() = x; this->y() = y;};
+			Line2D():mFrom(),mTo(){};
+			Line2D(T x1, T y1, T x2, T y2):mFrom(x1,y1),mTo(x2,y2){};
+			Line2D(const Point2D<T> &lhs, const Point2D<T> &rhs):mFrom(lhs),mTo(rhs){};
 
-			T& x(){return (*this)[0];};
-			const T& x() const {return (*this)[0];};
+			const Point2D<T>& from() const { return mFrom; };
+			const Point2D<T>& to() const { return mTo; };
 
-			T& y(){return (*this)[1];};
-			const T& y() const {return (*this)[1];};
+			T length() const { return mFrom.distance(mTo); };
 
-			void transpose(T x, T y) { this->x() += x; this->y() += y; };
-			Point2D<T> transpose(T x, T y) const { return Point2D<T>(this->x() + x, this->y() + y); };
-
-			T distance(Point2D<T> point) const
+			Vector2D<T> toVector() const
 			{
-				return sqrt(pow(this->x()-point.x(),2)+pow(this->y()-point.y(),2));
+				return Vector2D<T>(mTo.x()-mFrom.x(),mTo.y()-mFrom.y());
 			}
 
-			e_char8 quadrant(Point2D<T> point) const
-			{
-				if(point.x() >= this->x() && point.y() > this->y())
-					return 1;
-				else if(point.x() < this->x() && point.y() >= this->y())
-					return 2;
-				else if(point.x() <= this->x() && point.y() < this->y())
-					return 3;
-				else if(point.x() > this->x() && point.y() <= this->y())
-					return 4;
-				else
-					return 0;
-			}
+		private:
+			Point2D<T> mFrom, mTo;
 	};
 
-	typedef Point2D<e_uchar8> Point2Duc;
-	typedef Point2D<e_char8> Point2Dc;
-	typedef Point2D<e_uint32> Point2Dui;
-	typedef Point2D<e_int32> Point2Di;
-	typedef Point2D<e_float32> Point2Df;
-	typedef Point2D<e_double64> Point2Dd;
+	typedef Line2D<e_uchar8> Line2Duc;
+	typedef Line2D<e_char8> Line2Dc;
+	typedef Line2D<e_uint32> Line2Dui;
+	typedef Line2D<e_int32> Line2Di;
+	typedef Line2D<e_float32> Line2Df;
+	typedef Line2D<e_double64> Line2Dd;
 }
 
-#endif
+#endif /* EVALINE3D_H_ */

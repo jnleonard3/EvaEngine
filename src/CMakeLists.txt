@@ -12,7 +12,9 @@ ADD_SUBDIRECTORY(eva)
 ADD_SUBDIRECTORY(eva/osg)
 
 # Build applications
-ADD_SUBDIRECTORY(apps)
+IF($ENV{EVA_BUILD_APPS})
+	ADD_SUBDIRECTORY(apps)
+ENDIF()
 
 # Build unit/performance tests
 IF($ENV{EVA_BUILD_TESTS})

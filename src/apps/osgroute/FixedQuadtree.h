@@ -26,9 +26,11 @@
 #define FIXEDQUADTREE_H_
 
 #include "eva/Typedefs.h"
-#include "eva/geometry/evaPoint2D.h"
-#include "eva/geometry/evaLine2D.h"
-#include "eva/geometry/evaRectangle2D.h"
+#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/geometry/basic/2d/evaLine2D.h"
+#include "eva/geometry/basic/2d/evaSquare.h"
+#include "eva/geometry/basic/2d/evaRectangle.h"
+#include "eva/geometry/intersection/Intersection2D.h"
 
 #include <vector>
 #include <list>
@@ -36,8 +38,8 @@
 
 struct QuadAppearance
 {
-	QuadAppearance(eva::Square2Dd quad, e_uchar8 level,bool hasData):mQuad(quad),mLevel(level),mHasData(hasData){};
-	eva::Square2Dd mQuad;
+	QuadAppearance(eva::Squared quad, e_uchar8 level,bool hasData):mQuad(quad),mLevel(level),mHasData(hasData){};
+	eva::Squared mQuad;
 	e_uchar8 mLevel;
 	bool mHasData;
 };
@@ -55,24 +57,24 @@ template <class T>
 class FixedQuadtree
 {
 	public:
-		FixedQuadtree(eva::Square2Dd area, e_float32 minRadius):mMinimumRadius(minRadius){mRoot = new Quad(area);};
+		FixedQuadtree(eva::Squared area, e_float32 minRadius):mMinimumRadius(minRadius){mRoot = new Quad(area);};
 		virtual ~FixedQuadtree(){};
 
 		bool insert(T* data, eva::Point2Dd pos)
 		{ return insert(data,pos,mRoot); };
 
-		bool insert(T* data, eva::Rectangle2Dd rect)
+		bool insert(T* data, eva::Rectangled rect)
 		{ return insert(data,rect,mRoot); };
 
 		bool move(T* data, eva::Point2Dd oldPos, eva::Point2Dd newPos)
 		{ return move(data,oldPos,newPos,mRoot); };
 
-		bool move(T* data, eva::Rectangle2Dd oldRect, eva::Rectangle2Dd newRect)
+		bool move(T* data, eva::Rectangled oldRect, eva::Rectangled newRect)
 		{ return move(data,oldRect,newRect,mRoot); };
 
 		template <typename Visitor>
 		bool lineOfSightQuery(eva::Line2Dd query, Visitor &visit) const
-		{ if(mRoot && query.intersects(mRoot->mQuad)) return lineOfSightQuery<Visitor>(query,visit,mRoot); return false; };
+		{ if(mRoot && eva::Intersection2D::Intersects<e_double64>(query,mRoot->mQuad)) return lineOfSightQuery<Visitor>(query,visit,mRoot); return false; };
 
 		std::vector<QuadAppearance> getAppearance() const
 		{
@@ -84,15 +86,15 @@ class FixedQuadtree
 	private:
 		struct Quad
 		{
-			Quad(eva::Square2Dd quad):mQuad(quad),mTR(0),mBR(0),mBL(0),mTL(0){};
+			Quad(eva::Squared quad):mQuad(quad),mTR(0),mBR(0),mBL(0),mTL(0){};
 			std::list<T*> mItems;
-			eva::Square2Dd mQuad;
+			eva::Squared mQuad;
 			Quad *mTR, *mBR, *mBL, *mTL;
 		};
 
 		bool insert(T* data, eva::Point2Dd pos, Quad *quad)
 		{
-			if(quad && quad->mQuad.intersects(pos))
+			if(quad && eva::Intersection2D::Intersects<e_double64>(quad->mQuad,pos))
 			{
 				e_double64 radius = quad->mQuad.radius();
 				if(radius < mMinimumRadius)
@@ -102,14 +104,14 @@ class FixedQuadtree
 					return true;
 				}
 
-				const eva::Point2Dd &center = quad->mQuad.center();
+				const eva::Point2Dd &center = quad->mQuad.constRef().getCenter();
 				if(!quad->mTR)
 				{
 					e_double64 halfRadius = radius/2.0;
-					quad->mTR = new Quad(eva::Square2Dd(center.transpose(halfRadius,halfRadius),halfRadius));
-					quad->mBR = new Quad(eva::Square2Dd(center.transpose(halfRadius,-halfRadius),halfRadius));
-					quad->mBL = new Quad(eva::Square2Dd(center.transpose(-halfRadius,-halfRadius),halfRadius));
-					quad->mTL = new Quad(eva::Square2Dd(center.transpose(-halfRadius,halfRadius),halfRadius));
+					quad->mTR = new Quad(eva::Squared(center.transpose(halfRadius,halfRadius),halfRadius));
+					quad->mBR = new Quad(eva::Squared(center.transpose(halfRadius,-halfRadius),halfRadius));
+					quad->mBL = new Quad(eva::Squared(center.transpose(-halfRadius,-halfRadius),halfRadius));
+					quad->mTL = new Quad(eva::Squared(center.transpose(-halfRadius,halfRadius),halfRadius));
 				}
 
 				switch(center.quadrant(pos))
@@ -129,26 +131,27 @@ class FixedQuadtree
 			return false;
 		}
 
-		bool insert(T* data, eva::Rectangle2Dd rect, Quad *quad)
+		bool insert(T* data, eva::Rectangled rect, Quad *quad)
 		{
-			if(quad && rect.intersects(quad->mQuad))
+			if(quad && eva::Intersection2D::Intersects<e_double64>(rect,quad->mQuad))
 			{
 				e_double64 radius = quad->mQuad.radius();
 				if(radius < mMinimumRadius)
 				{
+					std::cout << "lol\n";
 					if(data)
 						quad->mItems.push_back(data);
 					return true;
 				}
 
-				const eva::Point2Dd &center = quad->mQuad.center();
+				const eva::Point2Dd &center = quad->mQuad.constRef().getCenter();
 				if(!quad->mTR)
 				{
 					e_double64 halfRadius = radius/2.0;
-					quad->mTR = new Quad(eva::Square2Dd(center.transpose(halfRadius,halfRadius),halfRadius));
-					quad->mBR = new Quad(eva::Square2Dd(center.transpose(halfRadius,-halfRadius),halfRadius));
-					quad->mBL = new Quad(eva::Square2Dd(center.transpose(-halfRadius,-halfRadius),halfRadius));
-					quad->mTL = new Quad(eva::Square2Dd(center.transpose(-halfRadius,halfRadius),halfRadius));
+					quad->mTR = new Quad(eva::Squared(center.transpose(halfRadius,halfRadius),halfRadius));
+					quad->mBR = new Quad(eva::Squared(center.transpose(halfRadius,-halfRadius),halfRadius));
+					quad->mBL = new Quad(eva::Squared(center.transpose(-halfRadius,-halfRadius),halfRadius));
+					quad->mTL = new Quad(eva::Squared(center.transpose(-halfRadius,halfRadius),halfRadius));
 				}
 
 				bool result = false;
@@ -163,9 +166,9 @@ class FixedQuadtree
 
 		bool move(T* data, eva::Point2Dd oldPos, eva::Point2Dd newPos, Quad *quad)
 		{
-			if(quad && quad->mQuad.intersects(oldPos))
+			if(quad && eva::Intersection2D::Intersects<e_double64>(quad->mQuad,oldPos))
 			{
-				eva::Point2Dd &center = quad->mQuad.center();
+				eva::Point2Dd &center = quad->mQuad.constRef().getCenter();
 				if(quad->mTR)
 				{
 					bool result = false;
@@ -192,7 +195,7 @@ class FixedQuadtree
 						}
 				}
 
-				if(quad->mQuad.intersects(newPos))
+				if(eva::Intersection2D::Intersects<e_double64>(quad->mQuad,newPos))
 				{
 					if(quad->mTR)
 					{
@@ -217,11 +220,11 @@ class FixedQuadtree
 			return false;
 		};
 
-		bool move(T* data, eva::Rectangle2Dd oldRect, eva::Rectangle2Dd newRect, Quad* quad)
+		bool move(T* data, eva::Rectangled oldRect, eva::Rectangled newRect, Quad* quad)
 		{
 			if(quad)
 			{
-				bool intersectsOldRect = quad->mQuad.intersects(oldRect), intersectsNewRect = quad->mQuad.intersects(newRect);
+				bool intersectsOldRect = eva::Intersection2D::Intersects<e_double64>(quad->mQuad,oldRect), intersectsNewRect = eva::Intersection2D::Intersects<e_double64>(quad->mQuad,newRect);
 				if(intersectsOldRect || intersectsNewRect)
 				{
 					if(quad->mTR)
@@ -276,25 +279,25 @@ class FixedQuadtree
 					}
 
 					eva::Point2Dd intersection;
-					if(query.intersects(quad->mTR->mQuad,intersection))
+					if(eva::Intersection2D::Intersection<e_double64>(query,quad->mTR->mQuad,intersection))
 					{
 						quads[0] = quad->mTR;
 						distance[0] = query.from().distance(intersection);
 					}
 
-					if(query.intersects(quad->mTL->mQuad, intersection))
+					if(eva::Intersection2D::Intersection<e_double64>(query,quad->mTL->mQuad,intersection))
 					{
 						quads[1] = quad->mTL;
 						distance[1] = query.from().distance(intersection);
 					}
 
-					if(query.intersects(quad->mBL->mQuad, intersection))
+					if(eva::Intersection2D::Intersection<e_double64>(query,quad->mBL->mQuad,intersection))
 					{
 						quads[2] = quad->mBL;
 						distance[2] = query.from().distance(intersection);
 					}
 
-					if(query.intersects(quad->mBR->mQuad, intersection))
+					if(eva::Intersection2D::Intersection<e_double64>(query,quad->mBR->mQuad,intersection))
 					{
 						quads[3] = quad->mBR;
 						distance[3] = query.from().distance(intersection);

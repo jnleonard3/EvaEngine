@@ -24,14 +24,7 @@
 
 #include "OsgHelper.h"
 
-#include <osg/Node>
-#include <osg/Group>
-#include <osg/Geode>
-#include <osg/Geometry>
-#include <osg/Texture2D>
-#include <osg/StateSet>
-
-osg::Group* OsgHelper::drawSquare(eva::Square2Dd rect, e_double64 z)
+osg::Group* OsgHelper::drawSquare(const eva::Squared rect, e_double64 z)
 {
 	osg::Group* root = new osg::Group();
 
@@ -40,10 +33,8 @@ osg::Group* OsgHelper::drawSquare(eva::Square2Dd rect, e_double64 z)
 	baseGeode->addDrawable(baseGeometry);
 
 	osg::Vec3Array* baseVertices = new osg::Vec3Array;
-	baseVertices->push_back(osg::Vec3(rect.from().x(),rect.to().y(),z)); // front left
-	baseVertices->push_back(osg::Vec3(rect.to().x(),rect.to().y(),z)); // front right
-	baseVertices->push_back(osg::Vec3(rect.to().x(),rect.from().y(),z)); // back right
-	baseVertices->push_back(osg::Vec3(rect.from().x(),rect.from().y(),z)); // back left
+	for(e_uchar8 i = 0; i < 4; ++i)
+		baseVertices->push_back(OsgHelper::eva2DPointToOsgVec(rect.getVerticies()[i],z));
 	baseGeometry->setVertexArray(baseVertices);
 
 	osg::DrawElementsUInt* line =  new osg::DrawElementsUInt(osg::PrimitiveSet::LINES, 0);
@@ -72,7 +63,7 @@ osg::Group* OsgHelper::drawSquare(eva::Square2Dd rect, e_double64 z)
 	return root;
 }
 
-osg::Group* OsgHelper::drawFilledSquare(eva::Square2Dd rect, e_double64 z, eva::Point3Dd color)
+osg::Group* OsgHelper::drawFilledSquare(const eva::Squared rect, e_double64 z, eva::Point3Dd color)
 {
 	osg::Group* root = new osg::Group();
 
@@ -81,17 +72,15 @@ osg::Group* OsgHelper::drawFilledSquare(eva::Square2Dd rect, e_double64 z, eva::
 	baseGeode->addDrawable(baseGeometry);
 
 	osg::Vec3Array* baseVertices = new osg::Vec3Array;
-	baseVertices->push_back(osg::Vec3(rect.from().x(),rect.to().y(),z)); // front left
-	baseVertices->push_back(osg::Vec3(rect.to().x(),rect.to().y(),z)); // front right
-	baseVertices->push_back(osg::Vec3(rect.to().x(),rect.from().y(),z)); // back right
-	baseVertices->push_back(osg::Vec3(rect.from().x(),rect.from().y(),z)); // back left
+	for(e_uchar8 i = 0; i < 4; ++i)
+		baseVertices->push_back(OsgHelper::eva2DPointToOsgVec(rect.getVerticies()[i],z));
 	baseGeometry->setVertexArray(baseVertices);
 
 	osg::DrawElementsUInt* quad =  new osg::DrawElementsUInt(osg::PrimitiveSet::QUADS, 0);
-	quad->push_back(3);
-	quad->push_back(2);
-	quad->push_back(1);
 	quad->push_back(0);
+	quad->push_back(1);
+	quad->push_back(2);
+	quad->push_back(3);
 	baseGeometry->addPrimitiveSet(quad);
 
 	osg::Vec4Array* colors = new osg::Vec4Array;
@@ -146,4 +135,9 @@ osg::Group* OsgHelper::drawQuadtree(std::vector<QuadAppearance> &quadtree)
 			root->addChild(drawSquare(quadtree[i].mQuad,5.0+quadtree[i].mLevel*0.25));
 
 	return root;
+}
+
+osg::Vec3 OsgHelper::eva2DPointToOsgVec(const eva::Point2Dd& pt, e_double64 z)
+{
+	return osg::Vec3(pt.x(),pt.y(),z);
 }

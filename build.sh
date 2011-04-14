@@ -50,6 +50,7 @@ BUILD_TESTS=
 RUN_TESTS=
 TEST_PARAMETERS=
 BUILD_TYPE=
+BUILD_APPS=
 
 if [ "$#" -eq "0" ]
 then
@@ -57,7 +58,7 @@ then
 	exit 1
 fi
 
-while getopts "hdtcrR:b:" OPTION
+while getopts "hdatcrR:b:" OPTION
 do
 	case $OPTION in
 		h)
@@ -66,6 +67,9 @@ do
 			;;
 		d)
 			BUILD_DOXYGEN="TRUE"
+			;;
+		a)
+			BUILD_APPS="TRUE"
 			;;
 		t)
 			BUILD_TESTS="TRUE"
@@ -101,6 +105,11 @@ fi
 if [ "$BUILD_TESTS" = "TRUE" ]
 then
 	export EVA_BUILD_TESTS="1"
+fi
+
+if [ "$BUILD_APPS" = "TRUE" ]
+then
+	export EVA_BUILD_APPS="1"
 fi
 
 if [ "$BUILD_TYPE" = "debug" -o "$BUILD_TYPE" = "all" ]

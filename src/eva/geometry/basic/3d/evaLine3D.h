@@ -27,7 +27,7 @@
 
 #include "eva/Typedefs.h"
 #include "math.h"
-#include "evaPoint3D.h"
+#include "eva/geometry/basic/3d/evaPoint3D.h"
 #include "eva/math/evaMathCommon.h"
 
 namespace eva
@@ -43,39 +43,6 @@ namespace eva
 			const Point3D<T>& to() const { return mTo; };
 
 			T length() const { return mFrom.distance(mTo); };
-
-			// This is 2D intersection for now for simplicity's sake
-			bool intersects(const Line3D<T>& line, Point3D<T> &intersection) const
-			{
-				double AOne = line.to().y() - line.from().y();
-				double BOne = line.from().x() - line.to().x();
-				double COne = AOne*line.from().x()+BOne*line.from().y();
-				double ATwo = this->to().y() - this->from().y();
-				double BTwo = this->from().x() - this->to().x();
-				double CTwo = ATwo*this->from().x()+BTwo*this->from().y();
-				double det = AOne*BTwo-ATwo*BOne;
-				if(det == 0)
-					return false;
-				else
-				{
-					double x = (BTwo*COne-BOne*CTwo)/det;
-					double y = (AOne*CTwo-ATwo*COne)/det;
-					if(MathCommon::isWithin<e_double64>(line.from().x(),line.to().x(),x) && MathCommon::isWithin<e_double64>(line.from().y(),line.to().y(),y))
-						if(MathCommon::isWithin<e_double64>(this->from().x(),this->to().x(),x) && MathCommon::isWithin<e_double64>(this->from().y(),this->to().y(),y))
-						{
-							intersection.x() = x;
-							intersection.y() = y;
-							return true;
-						}
-				}
-				return false;
-			}
-
-			bool intersects(const Line3D<T>& line) const
-			{
-				Point3D<T> temp;
-				return this->intersects(line,temp);
-			}
 
 		private:
 			Point3D<T> mFrom, mTo;

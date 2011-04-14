@@ -28,26 +28,31 @@
 #include "FixedQuadtree.h"
 
 #include "eva/Typedefs.h"
-#include "eva/geometry/evaPoint3D.h"
-#include "eva/geometry/evaRectangle2D.h"
+#include "eva/geometry/basic/3d/evaPoint3D.h"
+#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/geometry/basic/2d/evaSquare.h"
 
-namespace osg
-{
-	class Group;
-}
+#include <osg/Node>
+#include <osg/Group>
+#include <osg/Geode>
+#include <osg/Geometry>
+#include <osg/Texture2D>
+#include <osg/StateSet>
 
 class OsgHelper
 {
 	public:
 		virtual ~OsgHelper(){};
 
-		static osg::Group* drawSquare(eva::Square2Dd rect, e_double64 z);
+		static osg::Group* drawSquare(const eva::Squared rect, e_double64 z);
 
-		static osg::Group* drawFilledSquare(eva::Square2Dd rect, e_double64 z, eva::Point3Dd color);
+		static osg::Group* drawFilledSquare(const eva::Squared rect, e_double64 z, eva::Point3Dd color);
 
 		static osg::Group* drawBase(eva::Point3Dd from, eva::Point3Dd to, e_double64 z, eva::Point3Dd color);
 
 		static osg::Group* drawQuadtree(std::vector<QuadAppearance> &quadtree);
+
+		static osg::Vec3 eva2DPointToOsgVec(const eva::Point2Dd& pt, e_double64 z);
 
 	private:
 		OsgHelper(){};
