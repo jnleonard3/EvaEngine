@@ -102,6 +102,12 @@ then
 	echo "STATUS: Done!"
 fi
 
+if [ "$BUILD_TYPE" = "all" ]
+then
+	BUILD_TESTS="TRUE"
+	BUILD_APPS="TRUE"
+fi
+
 if [ "$BUILD_TESTS" = "TRUE" ]
 then
 	export EVA_BUILD_TESTS="1"

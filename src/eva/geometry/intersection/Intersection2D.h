@@ -160,9 +160,7 @@ namespace eva
 				{
 					T yA = (lineAVec.j()/lineAVec.i())*(pt.x() - a.from().x()) + a.from().y();
 					T yB = (lineBVec.j()/lineBVec.i())*(pt.x() - b.from().x()) + b.from().y();
-					if(MathCommon::isWithin<T>(a.from().y(),a.to().y(),yA) &&
-						MathCommon::isWithin<T>(b.from().y(),b.to().y(),yB) &&
-						MathCommon::isWithin<T>(yA,yB,pt.y()))
+					if(MathCommon::isWithin<T>(yA,yB,pt.y()))
 						return true;
 				}
 				else
@@ -175,9 +173,7 @@ namespace eva
 				{
 					T xA = (lineAVec.i()/lineAVec.j())*(pt.y() - a.from().y()) + a.from().x();
 					T xB = (lineBVec.i()/lineBVec.j())*(pt.y() - b.from().y()) + b.from().x();
-					if(MathCommon::isWithin<T>(a.from().x(),a.to().x(),xA) &&
-						MathCommon::isWithin<T>(b.from().x(),b.to().x(),xB) &&
-						MathCommon::isWithin<T>(xA,xB,pt.x()))
+					if(MathCommon::isWithin<T>(xA,xB,pt.x()))
 						return true;
 				}
 				else

@@ -138,7 +138,6 @@ class FixedQuadtree
 				e_double64 radius = quad->mQuad.radius();
 				if(radius < mMinimumRadius)
 				{
-					std::cout << "lol\n";
 					if(data)
 						quad->mItems.push_back(data);
 					return true;
