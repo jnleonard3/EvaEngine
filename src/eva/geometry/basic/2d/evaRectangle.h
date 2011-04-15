@@ -37,6 +37,7 @@ namespace eva
 			Rectangle(){};
 			Rectangle(T fX, T fY, T tX, T tY):Tetragon<T>(Point2D<T>(fX,fY),Point2D<T>(tX,tY)){};
 			Rectangle(const Point2D<T>& from, const Point2D<T>& to):Tetragon<T>(from,to){};
+			Rectangle(const Point2D<T>& center, const Vector2D<T>& tl):Tetragon<T>(center,tl){};
 	};
 
 	typedef Rectangle<e_uchar8> Rectangleuc;

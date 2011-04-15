@@ -111,7 +111,7 @@ namespace eva
 			{ Point2D<T> pt; return Intersection2D::Intersection<T>(tetra,line,pt); }
 			template <class T>
 			static bool Intersection(const Line2D<T>& line, const Tetragon<T>& tetra, Point2D<T> &pt)
-			{ return Intersection2D::Intersection<T>(line,tetra,pt); }
+			{ return Intersection2D::Intersection<T>(tetra,line,pt); }
 			template <class T>
 			static bool Intersection(const Tetragon<T>& tetra, const Line2D<T>& line, Point2D<T> &pt)
 			{

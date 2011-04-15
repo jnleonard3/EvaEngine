@@ -58,6 +58,16 @@ namespace eva
 				vectors[3] = vectors[1]*-1;
 				this->recalculate();
 			};
+			Tetragon(const Point2D<T>& center, const Vector2D<T>& tl)
+			:FixedPolygon<T,4>(center)
+			{
+				Vector2D<T>* vectors = this->getVectors();
+				vectors[0] = tl;
+				vectors[1] = Vector2D<T>(tl.i(),-tl.j());
+				vectors[2] = vectors[0]*-1;
+				vectors[3] = vectors[1]*-1;
+				this->recalculate();
+			};
 			Tetragon(const Point2D<T>& center, T radius)
 			:FixedPolygon<T,4>(center)
 			{

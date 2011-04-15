@@ -47,7 +47,7 @@ namespace eva
 
 			Vector2D<T> rotate(e_float32 radians) const
 			{
-				return Vector2D<T>(this->x()*cos(radians)-this->y()*sin(radians),this->x()*sin(radians)+this->y()*cos(radians));
+				return Vector2D<T>(this->i()*cos(radians)-this->j()*sin(radians),this->i()*sin(radians)+this->j()*cos(radians));
 			}
 
 			T magnitude() const
