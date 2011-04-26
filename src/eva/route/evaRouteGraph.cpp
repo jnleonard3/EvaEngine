@@ -36,6 +36,10 @@ namespace eva
 		RouteGraphEdge **edgeMemoryStart = allocateSpace(mMaxEdgeEdges);
 		RouteGraphEdge &edge = mGraphEdges.pushBack(RouteGraphEdge(ROUTEEDGE_DIRECT, &nodeTo, &nodeFrom, mMaxEdgeEdges, edgeMemoryStart));
 
+		RTreeLeaf leaf(false,(e_uint32)nodeFrom.getPoint().x(),(e_uint32)nodeTo.getPoint().x(),(e_uint32)nodeFrom.getPoint().y(),(e_uint32)nodeTo.getPoint().y(),(e_uint32)nodeFrom.getPoint().z(),(e_uint32)nodeTo.getPoint().z());
+		leaf.data.mEdge = &edge;
+		mRTree.Insert(leaf,leaf.boundingBox);
+
 		for(e_uchar8 i = 0; i < nodeFrom.getNumEdgesFrom(); ++i)
 			if(nodeFrom.getFromEdge(i) == 0 || nodeFrom.getFromEdge(i)->getType() == ROUTEEDGE_INVALID)
 			{
@@ -109,6 +113,11 @@ namespace eva
 		visitor = mRTree.Query<RouteGraphNearestNeighborAcceptor,RouteGraphNearestNeighborVisitor>(acceptor,visitor);
 
 		return visitor.mClosest;
+	}
+
+	RouteGraphEdge* RouteGraph::findClosestRoute(const Point3Dd& query, Point3Dd& pt)
+	{
+
 	}
 
 	bool RouteGraph::findPath(RouteNode &nodeFrom, RouteNode &nodeTo, std::list<RoutePathElement> &pathResult) const

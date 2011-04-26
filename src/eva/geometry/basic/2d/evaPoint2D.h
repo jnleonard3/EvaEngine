@@ -26,35 +26,30 @@
 #define EVA_POINT2D_H_
 
 #include "eva/Typedefs.h"
-#include "eva/structures/evaFixedArray.h"
-#include "eva/math/evaVector2D.h"
+#include "eva/geometry/generic/evaAbstractPoint.h"
 
 #include "math.h"
 
 namespace eva
 {
 	template <class T>
-	class Point2D : public FixedArray<T,2>
+	class Point2D : public AbstractPoint<T,2>
 	{
 		public:
-			Point2D(){};
-			Point2D(T x, T y){this->x() = x; this->y() = y;};
-			Point2D(const Point2D<T> &pt, const Vector2D<T> &vec){this->x() = pt.x() + vec.i(); this->y() = pt.y() + vec.j();};
+			Point2D()
+			:AbstractPoint<T,2>(){};
+			Point2D(T x, T y)
+			:AbstractPoint<T,2>(){this->x() = x; this->y() = y;};
+			Point2D(const Point2D<T> &pt, const FixedArray<T,2> &vec)
+			:AbstractPoint<T,2>(pt,vec){};
+			Point2D(const FixedArray<T,2>& array)
+			:AbstractPoint<T,2>(array){};
 
 			T& x(){return (*this)[0];};
 			const T& x() const {return (*this)[0];};
 
 			T& y(){return (*this)[1];};
 			const T& y() const {return (*this)[1];};
-
-			void transpose(T x, T y) { this->x() += x; this->y() += y; };
-			Point2D<T> transpose(T x, T y) const { return Point2D<T>(this->x() + x, this->y() + y); };
-			Point2D<T> transpose(FixedArray<T,2> &array) const { return Point2D<T>(this->x() + array[0], this->y() + array[1]); };
-
-			T distance(Point2D<T> point) const
-			{
-				return sqrt(pow(this->x()-point.x(),2)+pow(this->y()-point.y(),2));
-			}
 
 			e_char8 quadrant(Point2D<T> point) const
 			{
@@ -70,36 +65,15 @@ namespace eva
 					return 0;
 			}
 
-			Point2D<T> rotate(e_float32 radians) const
+			const Point2D<T> rotate(e_float32 radians) const
 			{
 				return Point2D<T>(this->x()*cos(radians)-this->y()*sin(radians),this->x()*sin(radians)+this->y()*cos(radians));
 			}
 
-			Point2D<T> rotate(Point2D<T> origin, e_float32 radians) const
+			const Point2D<T> rotate(Point2D<T> origin, e_float32 radians) const
 			{
 				T xDiff = origin.x() - this->x(), yDiff = origin.y() - this->y();
 				return Point2D<T>((xDiff*cos(radians)-yDiff*sin(radians))+this->x(),(xDiff*sin(radians)+yDiff*cos(radians))+this->y());
-			}
-
-			Vector2D<T> toVector(const Point2D<T> &to) const
-			{
-				return Vector2D<T>(this->x(),this->y(),to.x(),to.y());
-			}
-
-			const Point2D<T> operator+(const Point2D<T> &rhs) const
-			{
-				Point2D<T> result = *this;
-				result.x() += rhs.x();
-				result.y() += rhs.y();
-				return result;
-			}
-
-			const Point2D<T> operator+(const Vector2D<T> &other) const
-			{
-				Point2D<T> result = *this;
-				result.x() += other.i();
-				result.y() += other.j();
-				return result;
 			}
 	};
 

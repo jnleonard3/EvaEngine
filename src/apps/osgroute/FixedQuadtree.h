@@ -108,10 +108,10 @@ class FixedQuadtree
 				if(!quad->mTR)
 				{
 					e_double64 halfRadius = radius/2.0;
-					quad->mTR = new Quad(eva::Squared(center.transpose(halfRadius,halfRadius),halfRadius));
-					quad->mBR = new Quad(eva::Squared(center.transpose(halfRadius,-halfRadius),halfRadius));
-					quad->mBL = new Quad(eva::Squared(center.transpose(-halfRadius,-halfRadius),halfRadius));
-					quad->mTL = new Quad(eva::Squared(center.transpose(-halfRadius,halfRadius),halfRadius));
+					quad->mTR = new Quad(eva::Squared(eva::Point2Dd(center,eva::Vector2Dd(halfRadius,halfRadius)),halfRadius));
+					quad->mBR = new Quad(eva::Squared(eva::Point2Dd(center,eva::Vector2Dd(halfRadius,-halfRadius)),halfRadius));
+					quad->mBL = new Quad(eva::Squared(eva::Point2Dd(center,eva::Vector2Dd(-halfRadius,-halfRadius)),halfRadius));
+					quad->mTL = new Quad(eva::Squared(eva::Point2Dd(center,eva::Vector2Dd(-halfRadius,halfRadius)),halfRadius));
 				}
 
 				switch(center.quadrant(pos))
@@ -147,10 +147,10 @@ class FixedQuadtree
 				if(!quad->mTR)
 				{
 					e_double64 halfRadius = radius/2.0;
-					quad->mTR = new Quad(eva::Squared(center.transpose(halfRadius,halfRadius),halfRadius));
-					quad->mBR = new Quad(eva::Squared(center.transpose(halfRadius,-halfRadius),halfRadius));
-					quad->mBL = new Quad(eva::Squared(center.transpose(-halfRadius,-halfRadius),halfRadius));
-					quad->mTL = new Quad(eva::Squared(center.transpose(-halfRadius,halfRadius),halfRadius));
+					quad->mTR = new Quad(eva::Squared(eva::Point2Dd(center,eva::Vector2Dd(halfRadius,halfRadius)),halfRadius));
+					quad->mBR = new Quad(eva::Squared(eva::Point2Dd(center,eva::Vector2Dd(halfRadius,-halfRadius)),halfRadius));
+					quad->mBL = new Quad(eva::Squared(eva::Point2Dd(center,eva::Vector2Dd(-halfRadius,-halfRadius)),halfRadius));
+					quad->mTL = new Quad(eva::Squared(eva::Point2Dd(center,eva::Vector2Dd(-halfRadius,halfRadius)),halfRadius));
 				}
 
 				bool result = false;

@@ -43,6 +43,13 @@ namespace eva
 		return Vector3Dd(0.0,0.0,0.0);
 	}
 
+	const Line3Dd RouteGraphEdge::toLine() const
+	{
+		if(mTo && mFrom && (this->getType() != ROUTEEDGE_INVALID))
+			return Line3Dd(mFrom->getPoint(),mTo->getPoint());
+		return Line3Dd(0.0,0.0,0.0,0.0,0.0,0.0);
+	}
+
 	void RouteGraphEdge::clear()
 	{
 		delete mConnectedEdges;

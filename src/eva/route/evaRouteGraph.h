@@ -42,6 +42,7 @@ namespace eva
 			std::vector<RouteNode*> queryNodesInArea(e_uint32 x, e_uint32 y, e_uint32 z, e_uint32 radius);
 
 			RouteNode* findClosest(e_double64 x, e_double64 y, e_double64 z);
+			RouteGraphEdge* findClosestRoute(const Point3Dd& query, Point3Dd& pt);
 
 			struct RoutePathParameters
 			{
@@ -127,12 +128,12 @@ namespace eva
 																							boundingBox.edges[2].first = z-1;
 																							boundingBox.edges[2].second = z+1;
 				};
-				RTreeLeaf(bool isnode, e_int32 x1, e_int32 x2, e_int32 y1, e_int32 y2, e_int32 z1, e_int32 z2):isNode(isnode){	boundingBox.edges[0].first = std::min(x1,x2);
-																																boundingBox.edges[0].second = std::max(x1,x2);
-																																boundingBox.edges[1].first = std::min(y1,y2);
-																																boundingBox.edges[1].second = std::max(y1,y2);
-																																boundingBox.edges[2].first = std::min(z1,z2);
-																																boundingBox.edges[2].second = std::max(z1,z2);
+				RTreeLeaf(bool isnode, e_int32 x1, e_int32 x2, e_int32 y1, e_int32 y2, e_int32 z1, e_int32 z2):isNode(isnode){	boundingBox.edges[0].first = std::min(x1,x2)-1;
+																																boundingBox.edges[0].second = std::max(x1,x2)+1;
+																																boundingBox.edges[1].first = std::min(y1,y2)-1;
+																																boundingBox.edges[1].second = std::max(y1,y2)+1;
+																																boundingBox.edges[2].first = std::min(z1,z2)-1;
+																																boundingBox.edges[2].second = std::max(z1,z2)+1;
 				};
 				bool isNode;
 				RStarTree<RTreeLeaf,3,5,50>::BoundingBox boundingBox;
@@ -142,10 +143,13 @@ namespace eva
 			struct NearestNeighborQuery
 			{
 				RouteNode *mClosest;
+				RouteGraphEdge *mClosestEdge;
+
 				Point3Dd mQueryPoint;
 				e_double64 mMaxDistance;
+				bool mQueryNode, mQueryEdge;
 
-				NearestNeighborQuery():mClosest(0),mQueryPoint(),mMaxDistance(1000000.0){};
+				NearestNeighborQuery():mClosest(0),mQueryPoint(),mMaxDistance(1000000.0),mQueryNode(true),mQueryEdge(false){};
 				bool updateDistance(e_double64 distance){ if(distance < mMaxDistance) { mMaxDistance = distance; return true; } return false; };
 			};
 
@@ -190,11 +194,15 @@ namespace eva
 				bool operator()(Leaf* leaf)
 				{
 					RTreeLeaf &rleaf = leaf->leaf;
-					if(rleaf.isNode)
+					if(mQueryNode && rleaf.isNode)
 					{
 						RouteNode *node = rleaf.data.mNode;
 						if(updateDistance(mQueryPoint.distance(node->getPoint())))
 							mClosest = node;
+					}
+					else if(mQueryEdge && !rleaf.isNode)
+					{
+
 					}
 					return true;
 				}

@@ -52,6 +52,12 @@ namespace eva
 				this->recalculate();
 			}
 
+			void move(const Vector2D<T>& trans)
+			{
+				this->getCenter() += trans;
+				this->recalculate();
+			}
+
 			void rotate(e_float32 angle)
 			{
 				Vector2D<T>* vectors = this->getVectors();

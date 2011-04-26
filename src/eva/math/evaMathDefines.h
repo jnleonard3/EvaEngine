@@ -22,68 +22,16 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTELLIGENTAGENTMANAGER_H_
-#define INTELLIGENTAGENTMANAGER_H_
+#ifndef EVAMATHDEFINES_H_
+#define EVAMATHDEFINES_H_
 
-#include "RoadCommon.h"
-#include "FixedQuadtree.h"
-#include "IntelligentAgent.h"
-
-#include "eva/geometry/basic/2d/evaPoint2D.h"
-#include "eva/geometry/basic/2d/evaSquare.h"
-#include "eva/math/evaVector3D.h"
-
-#include <list>
+#include "eva/Typedefs.h"
 
 namespace eva
 {
-	class RouteGraph;
-}
+	static const e_float32 E_PI = 3.14f;
 
-enum QuadtreeElementTypes
-{
-	INVALID_QUADTREEELEM,
-	INTELLIGENTAGENT_QUADTREEELEM,
 };
 
-union QuadtreeElement
-{
-	IntelligentAgent *mAgent;
-};
 
-struct QuadtreeData
-{
-	QuadtreeData():mType(INVALID_QUADTREEELEM){};
-	QuadtreeData(e_uchar8 type):mType(type){};
-	e_uchar8 mType;
-	QuadtreeElement mElement;
-};
-
-struct IntelligentAgentQuadtreeVisitor
-{
-	eva::Point2Dd hitPoint;
-	bool operator()(const QuadtreeData* const node)
-	{
-		return true;
-	}
-};
-
-class IntelligentAgentManager
-{
-	public:
-		IntelligentAgentManager(const eva::RouteGraph &graph, eva::Squared effectiveArea)
-		:DEFAULT_AGENT(*this),mAgentVector(0,DEFAULT_AGENT),mQuadtree(effectiveArea,15),mRouteGraph(graph){};
-		virtual ~IntelligentAgentManager(){};
-
-		void updatePositions(e_float32 secondsElapsed);
-
-		bool losQuery(eva::Line2Dd line, eva::Point2Dd &hit) const;
-
-	private:
-		const IntelligentAgent DEFAULT_AGENT;
-		std::vector<IntelligentAgent> mAgentVector;
-		FixedQuadtree<QuadtreeData> mQuadtree;
-		const eva::RouteGraph &mRouteGraph;
-};
-
-#endif /* INTELLIGENTAGENT_H_ */
+#endif

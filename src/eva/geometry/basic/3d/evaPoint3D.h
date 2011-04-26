@@ -26,17 +26,24 @@
 #define EVA_POINT3D_H_
 
 #include "eva/Typedefs.h"
-#include "eva/structures/evaFixedArray.h"
+#include "eva/geometry/generic/evaAbstractPoint.h"
+
 #include "math.h"
 
 namespace eva
 {
 	template <class T>
-	class Point3D : public FixedArray<T,3>
+	class Point3D : public AbstractPoint<T,3>
 	{
 		public:
-			Point3D(){};
-			Point3D(T x, T y, T z){this->x() = x; this->y() = y; this->z() = z;};
+			Point3D()
+			:AbstractPoint<T,3>(){};
+			Point3D(T x, T y, T z)
+			:AbstractPoint<T,3>(){this->x() = x; this->y() = y; this->z() = z;};
+			Point3D(const Point3D<T> &pt, const FixedArray<T,3> &vec)
+			:AbstractPoint<T,3>(pt,vec){};
+			Point3D(const FixedArray<T,3>& array)
+			:AbstractPoint<T,3>(array){};
 
 			T& x(){return (*this)[0];};
 			const T& x() const {return (*this)[0];};
@@ -46,42 +53,6 @@ namespace eva
 
 			T& z(){return (*this)[2];};
 			const T& z() const {return (*this)[2];};
-
-			void transpose(T x, T y, T z)
-			{
-				this->x() += x;
-				this->y() += y;
-				this->z() += z;
-			};
-
-			T distance(const Point3D<T>& point) const
-			{
-				return sqrt(pow(this->x()-point.x(),2)+pow(this->y()-point.y(),2)+pow(this->z()-point.z(),2));
-			};
-
-			Point3D<T> difference(const Point3D<T>& point) const
-			{
-				return Point3D<T>(abs(this->x()-point.x()),abs(this->y()-point.y()),abs(this->z()-point.z()));
-			};
-
-			bool isEqual(const Point3D<T> &rhs, e_float32 threshold) const
-			{
-				if(abs(this->x()-rhs.x()) < threshold)
-					if(abs(this->y()-rhs.y()) < threshold)
-						if(abs(this->z()-rhs.z()) < threshold)
-							return true;
-				return false;
-			};
-
-			bool isEqual(const Point3D<T> &rhs) const
-			{
-				return this->isEqual(rhs, 0.0f);
-			};
-
-			bool operator==(const Point3D<T> &rhs) const
-			{
-				return this->isEqual(rhs);
-			};
 	};
 
 	typedef Point3D<e_uchar8> Point3Duc;

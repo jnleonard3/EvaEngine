@@ -11,7 +11,7 @@ IF(OPENSCENEGRAPH_FOUND)
 	INCLUDE_DIRECTORIES(${OPENSCENEGRAPH_INCLUDE_DIRS})
 	
 	SET (TARGET evaOsgRouteGraph)
-	ADD_EXECUTABLE(${TARGET} RoadCommon.cpp OsgHelper.cpp PickHandler.cpp main.cpp)
+	ADD_EXECUTABLE(${TARGET} IntelligentAgentManager.cpp IntelligentAgent.cpp RoadCommon.cpp OsgHelper.cpp PickHandler.cpp main.cpp)
 	TARGET_LINK_LIBRARIES(${TARGET} EvaEngineLib EvaEngineOsgLib ${OPENSCENEGRAPH_LIBRARIES})
 	
 	INSTALL (TARGETS ${TARGET} DESTINATION bin)

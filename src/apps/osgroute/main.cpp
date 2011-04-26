@@ -206,18 +206,18 @@ int main(int argc, char** argv)
 	quadtree.move(data,eva::Rectangled(500.0,500.0,550.0,550.0),eva::Rectangled(50.0,50.0,100.0,100.0));
 
 	//quadtree.insert(data,eva::Rectangle2Dd(500.0,500.0,550.0,550.0));
-	root->addChild(OsgHelper::drawFilledSquare(eva::Squared(eva::Point2Dd(525.0,525.0),25.0),0.2,eva::Point3Dd(0.0,1.0,0.0)));
+//	root->addChild(OsgHelper::drawFilledSquare(eva::Squared(eva::Point2Dd(525.0,525.0),25.0),0.2,eva::Point3Dd(0.0,1.0,0.0)));
 
 	std::vector<QuadAppearance> quads = quadtree.getAppearance();
 
 	osg::Group* quadsRoot = OsgHelper::drawQuadtree(quads);
 	root->addChild(quadsRoot);
-	//quadsRoot->setNodeMask(0);
-/*
+	quadsRoot->setNodeMask(0);
+
 	BasicQuadtreeLineIntersectVisitor<int> visitor;
 	bool result = quadtree.lineOfSightQuery< BasicQuadtreeLineIntersectVisitor<int> >(eva::Line2Dd(50.0,50.0,550.0,550),visitor);
 	std::cout << result << "\n";
-*/
+
 	//IntelligentAgentManager intelligentManager(eva::Square2Dd(base.center(),(max+(extra*2.0)+extra)/2.0));
 
 	root->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);

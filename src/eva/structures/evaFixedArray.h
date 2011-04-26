@@ -22,28 +22,45 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FIXEDARRAY_H_
-#define FIXEDARRAY_H_
+#ifndef EVA_FIXEDARRAY_H_
+#define EVA_FIXEDARRAY_H_
 
 #include "eva/Typedefs.h"
 
 namespace eva
 {
-	template <typename T, e_uchar8 size>
+	template <typename T, e_uchar8 N>
 	class FixedArray
 	{
 		public:
 			FixedArray(){};
+			FixedArray(const FixedArray& array)
+			{
+				for(e_uchar8 i = 0; i < N; ++i)
+					(*this)[i] = array[i];
+			}
+
 			virtual ~FixedArray(){};
 
 			T& operator[] (e_uint32 index) { return this->mElements[index]; };
 			const T& operator[] (e_uint32 index) const { return this->mElements[index]; };
 
+			FixedArray<T,N>& operator=(const FixedArray<T,N> &rhs)
+			{
+			    // Check for self-assignment!
+			    if (this == &rhs)      // Same object?
+			      return *this;        // Yes, so skip assignment, and just return *this.
+
+				for(e_uchar8 i = 0; i < N; ++i)
+					(*this)[i] = rhs[i];
+			    return *this;
+			}
+
 		protected:
 			T& at(e_uint32 index) { return this->mElements[index]; };
 
 		private:
-			T mElements[size];
+			T mElements[N];
 	};
 }
 

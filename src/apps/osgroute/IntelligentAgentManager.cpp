@@ -26,7 +26,9 @@
 
 bool IntelligentAgentManager::losQuery(eva::Line2Dd line, eva::Point2Dd &hit) const
 {
-	IntelligentAgentQuadtreeVisitor<QuadtreeData> visitor;
-	bool result = mQuadtree.lineOfSightQuery<IntelligentAgentQuadtreeVisitor<QuadtreeData> >(line,visitor);
+	IntelligentAgentQuadtreeVisitor visitor;
+	bool result = mQuadtree.lineOfSightQuery<IntelligentAgentQuadtreeVisitor>(line,visitor);
+	if(result)
+		hit = visitor.hitPoint;
 	return result;
 }

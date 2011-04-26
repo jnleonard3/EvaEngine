@@ -28,10 +28,10 @@
 #include "RoadCommon.h"
 
 #include "eva/geometry/basic/2d/evaPoint2D.h"
-#include "eva/geometry/basic/3d/evaPoint3D.h"
 #include "eva/geometry/basic/2d/evaLine2D.h"
-#include "eva/math/evaVector3D.h"
+#include "eva/geometry/basic/2d/evaRectangle.h"
 #include "eva/route/evaRouteGraph.h"
+
 
 #include <list>
 
@@ -49,12 +49,18 @@ enum IntelligentAgentState
 class IntelligentAgent
 {
 	public:
+		static const e_double64 LOOKAHEAD_CONSTANT;
+		static const e_double64 MAX_VELOCITY_VALUE;
+		static const e_double64 ACCELERATION_INCREASE_VALUE;
 		static const e_double64 MAX_DECELERATION_VALUE;
+		static const e_double64 MAX_ACCELERATION_VALUE;
 
-		IntelligentAgent(IntelligentAgentManager &manager):mManager(manager),mState(STATE_WAITING),mBounds(0.0,0.0,2.0,5.0){};
-		IntelligentAgent(IntelligentAgentManager &manager, eva::Point3Dd position, e_float32 orientationAngle)
-		:mManager(manager),mState(STATE_WAITING),mPosition(position),mVelocityVector(),mAccelerationVector(),
-		 mOrientationAngle(orientationAngle),mBounds(0.0,0.0,2.0,5.0){};
+		IntelligentAgent(IntelligentAgentManager &manager)
+		:mManager(manager),mState(STATE_WAITING),mBounds(eva::Point2Dd(),eva::Vector2Dd(2.0,5.0)),
+		 mVelocityMagnitude(0.0f),mAccelerationMagnitude(0.0f),mSteeringWheelOffset(0.0f){};
+		IntelligentAgent(IntelligentAgentManager &manager, eva::Point3Dd position, e_float32 orientation)
+		:mManager(manager),mState(STATE_WAITING),mBounds(eva::Point2Dd(position.x(),position.y()),eva::Vector2Dd(2.0,5.0)),
+		 mVelocityMagnitude(0.0f),mAccelerationMagnitude(0.0f),mSteeringWheelOffset(0.0f){mBounds.rotate(orientation);};
 
 		void act();
 
@@ -62,23 +68,21 @@ class IntelligentAgent
 
 		void updatePosition(e_float32 secondsElapsed);
 
-		const eva::Point3Dd& getPosition() const { return mPosition; };
-		const e_float32& getOrientation() const { return mOrientationAngle; };
+		const eva::Point2Dd getPosition() const { return mBounds.constRef().getCenter(); };
+		const e_float32& getOrientation() const { return mBounds.constRef().getOrientation(); };
 
-		eva::Rectangled getBounds() const;
+		const eva::Rectangled getBounds() const { return mBounds; };
 
 	private:
 		IntelligentAgentManager &mManager;
 		e_uchar8 mState;
-		eva::Point3Dd mPosition;
-		eva::Vector3Dd mVelocityVector, mAccelerationVector;
-		e_float32 mOrientationAngle, mSteeringWheelOffset;
-		std::list<eva::RoutePathElement> mCurrentDirections;
 		eva::Rectangled mBounds;
+		e_float32 mVelocityMagnitude, mAccelerationMagnitude, mSteeringWheelOffset;
+		std::list<eva::RoutePathElement> mCurrentDirections;
 
 		const IntelligentAgentManager& getManager() const { return mManager; };
 
-		bool losQuery(eva::Line2Dd line, eva::Point2Dd &hit) const;
+		bool losQuery(const eva::Line2Dd &line, eva::Point2Dd &hit) const;
 };
 
 #endif /* INTELLIGENTAGENT_H_ */

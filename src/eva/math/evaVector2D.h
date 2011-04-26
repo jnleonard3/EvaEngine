@@ -26,18 +26,24 @@
 #define EVA_VECTOR2D_H_
 
 #include "eva/Typedefs.h"
-#include "eva/structures/evaFixedArray.h"
+#include "eva/math/evaAbstractVector.h"
+
 #include "math.h"
 
 namespace eva
 {
 	template <class T>
-	class Vector2D : public FixedArray<T,2>
+	class Vector2D : public AbstractVector<T,2>
 	{
 		public:
-			Vector2D(){};
-			Vector2D(T x, T y){this->i() = x; this->j() = y;};
-			Vector2D(T xF, T yF, T xT, T yT){this->i() = xT - xF; this->j() = yT - yF;};
+			Vector2D()
+			:AbstractVector<T,2>(){};
+			Vector2D(T x, T y)
+			:AbstractVector<T,2>(){this->i() = x; this->j() = y;};
+			Vector2D(T xF, T yF, T xT, T yT)
+			:AbstractVector<T,2>(){this->i() = xT - xF; this->j() = yT - yF;};
+			Vector2D(const FixedArray<T,2> &array)
+			:AbstractVector<T,2>(array){};
 
 			T& i(){return (*this)[0];};
 			const T& i() const {return (*this)[0];};
@@ -48,25 +54,6 @@ namespace eva
 			Vector2D<T> rotate(e_float32 radians) const
 			{
 				return Vector2D<T>(this->i()*cos(radians)-this->j()*sin(radians),this->i()*sin(radians)+this->j()*cos(radians));
-			}
-
-			T magnitude() const
-			{
-				return sqrt(pow(this->i(),2)+pow(this->j(),2));
-			}
-
-			Vector2D<T>& operator*=(e_int32 scale)
-			{
-				this->i() *= scale;
-				this->j() *= scale;
-				return *this;
-			}
-
-			const Vector2D<T> operator*(e_int32 scale) const
-			{
-				Vector2D<T> result = *this;
-				result *= scale;
-				return result;
 			}
 	};
 
