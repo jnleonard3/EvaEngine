@@ -31,12 +31,14 @@ namespace eva
 {
 	struct NearestNeighborQuery
 	{
+		bool queryNode;
 		RouteNode const *mClosestNode;
+		RouteGraphEdge const *mClosestEdge;
 
-		Point3Dd mQueryPoint;
+		Point3Dd mQueryPoint, mIntersectionPoint;
 		e_double64 mMaxNodeDistance;
 
-		NearestNeighborQuery():mQueryPoint(),mMaxNodeDistance(1000000.0){};
+		NearestNeighborQuery():queryNode(true),mQueryPoint(),mMaxNodeDistance(1000000.0){};
 		bool updateNodeDistance(e_double64 distance){ if(distance < mMaxNodeDistance) { mMaxNodeDistance = distance; return true; } return false; };
 	};
 
@@ -79,11 +81,21 @@ namespace eva
 
 		bool operator()(RouteGraph::RouteGraphRTree::Leaf const * const leaf)
 		{
-			if(leaf->leaf.isNode)
+			if(queryNode && leaf->leaf.isNode)
 			{
 				const eva::RouteNode &node = leaf->leaf.getNode();
 				if(updateNodeDistance(mQueryPoint.distance(node.getPoint())))
 					mClosestNode = &node;
+			}
+			else if(!queryNode && !leaf->leaf.isNode)
+			{
+				const eva::RouteGraphEdge &edge = leaf->leaf.getEdge();
+				Point3Dd inter = edge.toLine().projectOnto(mQueryPoint);
+				if(updateNodeDistance(mQueryPoint.distance(inter)))
+				{
+					mClosestEdge = &edge;
+					mIntersectionPoint = inter;
+				}
 			}
 			return true;
 		}
@@ -246,6 +258,20 @@ namespace eva
 		return visitor.mClosestNode;
 	}
 
+	RouteGraphEdge const * RouteGraph::findClosestEdge(const Point3Dd& pt, Point3Dd* intersect) const
+	{
+		NearestNeighborVisitor visitor(pt);
+		visitor.queryNode = false;
+		NearestNeighborAcceptor<RouteGraphRTree::Node, RouteGraphRTree::Leaf> acceptor(visitor);
+
+		visitor = mRTree.Query<NearestNeighborAcceptor<RouteGraphRTree::Node,RouteGraphRTree::Leaf>,NearestNeighborVisitor>(acceptor,visitor);
+
+		if(intersect)
+			(*intersect) = visitor.mIntersectionPoint;
+
+		return visitor.mClosestEdge;
+	}
+
 	struct RouteNodeRecord
 	{
 		RouteNodeRecord():mNode(0),mTravelEdge(0),mCostSoFar(0),mEstimatedTotalCost(0),mPreviousRecord(0){};
@@ -262,7 +288,9 @@ namespace eva
 
 	PathNode* RouteGraph::findPath(const Point3Dd &ptFrom, const Point3Dd &ptTo) const
 	{
-		const RouteNode &nodeFrom = *(this->findClosest(ptFrom)), &nodeTo = *(this->findClosest(ptTo));
+		Point3Dd fromNearest, toNearest;
+		RouteGraphEdge const * edgeFrom = this->findClosestEdge(ptFrom,&fromNearest), *edgeTo = this->findClosestEdge(ptTo,&toNearest);
+		const RouteNode &nodeFrom = *(edgeFrom->getNodeTo()), &nodeTo = *(edgeTo->getNodeFrom());
 		std::vector<RouteNodeRecord*> closedSet, openSet;
 		openSet.push_back(new RouteNodeRecord(&nodeFrom,0,0,nodeFrom.getPoint().distance(nodeTo.getPoint()),0));
 		RouteNodeRecord *currentRecord = openSet.front();
@@ -349,22 +377,7 @@ namespace eva
 		PathNode *pathResult = 0;
 		if(currentRecord->mNode == &nodeTo)
 		{
-			TemporaryRouteNode tmpNodeFrom(nodeFrom), tmpNodeTo(nodeTo);
-			bool ptHeadingTowardsNodeFrom, ptHeadingTowardsNodeTo;
-			Point3Dd fromNearest, toNearest;
-
-			for(e_uchar8 i = 0; i < nodeTo.getNumEdgesTo(); ++i)
-			{
-				RouteGraphEdge *edge = nodeTo.getToEdge(i);
-				if(currentRecord->mTravelEdge != edge)
-					tmpNodeTo.getToEdge(i)->invalidate();
-			}
-			toNearest = tmpNodeTo.getClosestEdgePointTo(ptTo,&ptHeadingTowardsNodeTo);
-
 			pathResult = new PathNode(toNearest);
-
-			if(ptHeadingTowardsNodeTo)
-				currentRecord = currentRecord->mPreviousRecord;
 
 			while(currentRecord != 0 && currentRecord->mNode != &nodeFrom)
 			{
@@ -377,28 +390,16 @@ namespace eva
 
 			if(currentRecord)
 			{
-				for(e_uchar8 i = 0; i < nodeFrom.getNumEdgesFrom(); ++i)
-				{
-					RouteGraphEdge *edge = nodeFrom.getFromEdge(i);
-					if(currentRecord->mTravelEdge != edge)
-						tmpNodeFrom.getFromEdge(i)->invalidate();
-				}
-				fromNearest = tmpNodeFrom.getClosestEdgePointTo(ptFrom,&ptHeadingTowardsNodeFrom);
-
-				if(ptHeadingTowardsNodeFrom)
-				{
-					PathNode *fromNode = new PathNode(currentRecord->mNode->getPoint());
-					fromNode->mNext = new PathEdge();
-					fromNode->mNext->mNext = pathResult;
-					pathResult = fromNode;
-				}
+				PathNode *fromNode = new PathNode(currentRecord->mNode->getPoint());
+				fromNode->mNext = new PathEdge();
+				fromNode->mNext->mNext = pathResult;
+				pathResult = fromNode;
 			}
 
 			PathNode *firstNode = new PathNode(fromNearest);
 			firstNode->mNext = new PathEdge();
 			firstNode->mNext->mNext = pathResult;
 			pathResult = firstNode;
-
 		}
 
 		for(e_uint32 i = 0; i < openSet.size(); ++i)

@@ -80,6 +80,7 @@ namespace eva
 			std::vector<RouteNode*> queryNodesInArea(e_uint32 x, e_uint32 y, e_uint32 z, e_uint32 radius);
 
 			RouteNode const * findClosest(const Point3Dd& pt) const;
+			RouteGraphEdge const * findClosestEdge(const Point3Dd& pt, Point3Dd* intersect) const;
 
 			PathNode* findPath(const Point3Dd &ptFrom, const Point3Dd &ptTo) const;
 			PathNode* findPath(const Point3Dd &ptFrom, const Point3Dd &ptTo, PathParameters &parameters) const;
