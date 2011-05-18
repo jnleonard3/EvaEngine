@@ -26,7 +26,7 @@
 #include "PickHandler.h"
 #include "OsgHelper.h"
 #include "FixedQuadtree.h"
-//#include "IntelligentAgentManager.h"
+#include "IntelligentAgentManager.h"
 
 #include "eva/osg/route/RouteGraphVisualizer.h"
 #include "eva/route/evaRouteNode.h"
@@ -56,7 +56,8 @@
 
 const double CENTIMETER_ACCURACY = 0.01;
 const double MILLIMETER_ACCURACY = 0.001;
-const double ROAD_WIDTH = 3.0;
+const double ROAD_WIDTH = 5.0;
+const double TIME_CONSTANT = 0.05;
 
 void printPoint(eva::Point3Dd point)
 {
@@ -108,7 +109,7 @@ osg::Group* drawRoads(std::vector<Road>& roads)
 				vec.normalize();
 				eva::Vector3Dd perp = vec.crossProduct(downVector);
 				perp.normalize();
-				perp.scale(ROAD_WIDTH/2.0);
+				perp *= ROAD_WIDTH/2.0;
 
 				osg::Vec3Array* roadVertices = new osg::Vec3Array;
 				roadVertices->push_back(osg::Vec3(start.x()-perp.i(), start.y()-perp.j(), start.z()-perp.k())); // front left
@@ -142,7 +143,7 @@ int main(int argc, char** argv)
 	std::vector<Road> listOfRoads;
 	bool flipOne = true, flipTwo = false, flipThree = true;;
 	e_uint32 numOfRoads = 20;
-	e_double64 extra = 10.0;
+	e_double64 extra = 5.0 + ROAD_WIDTH;
 	e_double64 spacing = 50.0;
 	e_double64 max = spacing*numOfRoads+extra;
 	for(e_double64 x = extra; x <= max; x += spacing)
@@ -180,7 +181,6 @@ int main(int argc, char** argv)
 	}
 
 	osg::Group* root = new osg::Group();
-
 	eva::Rectangled base(eva::Point2Dd(-extra,-extra),eva::Point2Dd(max+(extra*2.0),max+(extra*2.0)));
 	osg::Group* grassBase = OsgHelper::drawBase(eva::Point3Dd(-extra,-extra,0.0),eva::Point3Dd(max+(extra*2.0),max+(extra*2.0),0.0),-0.1,eva::Point3Dd(39.0/255.0,115.0/255.0,31.0/255.0));
 	root->addChild(grassBase);
@@ -206,7 +206,7 @@ int main(int argc, char** argv)
 	quadtree.move(data,eva::Rectangled(500.0,500.0,550.0,550.0),eva::Rectangled(50.0,50.0,100.0,100.0));
 
 	//quadtree.insert(data,eva::Rectangle2Dd(500.0,500.0,550.0,550.0));
-//	root->addChild(OsgHelper::drawFilledSquare(eva::Squared(eva::Point2Dd(525.0,525.0),25.0),0.2,eva::Point3Dd(0.0,1.0,0.0)));
+	//root->addChild(OsgHelper::drawFilledSquare(eva::Squared(eva::Point2Dd(525.0,525.0),25.0),0.2,eva::Point3Dd(0.0,1.0,0.0)));
 
 	std::vector<QuadAppearance> quads = quadtree.getAppearance();
 
@@ -215,16 +215,33 @@ int main(int argc, char** argv)
 	quadsRoot->setNodeMask(0);
 
 	BasicQuadtreeLineIntersectVisitor<int> visitor;
-	bool result = quadtree.lineOfSightQuery< BasicQuadtreeLineIntersectVisitor<int> >(eva::Line2Dd(50.0,50.0,550.0,550),visitor);
-	std::cout << result << "\n";
+	quadtree.lineOfSightQuery< BasicQuadtreeLineIntersectVisitor<int> >(eva::Line2Dd(50.0,50.0,550.0,550),visitor);
 
-	//IntelligentAgentManager intelligentManager(eva::Square2Dd(base.center(),(max+(extra*2.0)+extra)/2.0));
+	IntelligentAgentManager intelligentManager(graph, eva::Squared(base.constRef().getCenter(),(max+(extra*2.0)+extra)/2.0));
+	intelligentManager.addNewAgent(10.0,10.0,0.0);
+
+	OsgHelper::IntelligentAgentRender imRender(intelligentManager);
+	root->addChild(imRender.mRenderRoot);
 
 	root->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
 	osgViewer::Viewer viewer;
 	viewer.addEventHandler(new PickHandler(root,graph,graphRoot));
 	viewer.setSceneData(root);
-	viewer.run();
+	viewer.setCameraManipulator(new osgGA::TrackballManipulator);
+	viewer.realize();
+
+	while(!viewer.done())
+	{
+		intelligentManager.updatePositions(TIME_CONSTANT);
+
+		imRender.redraw();
+		viewer.frame();
+
+		intelligentManager.everybodyAct();
+
+		usleep(1000);
+	}
 
 	return 0;
 }

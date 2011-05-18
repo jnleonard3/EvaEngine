@@ -46,6 +46,17 @@ namespace eva
 
 			T length() const { return mFrom.distance(mTo); };
 
+			const Point2D<T> projectOnto(const Point2D<T>& pt) const
+			{
+				Point2D<T> resPt = pt.projectOnto(this->from(),this->toVector());
+				T length = this->length();
+				if(resPt.distance(this->from()) > length)
+					return this->to();
+				else if(resPt.distance(this->to()) > length)
+					return this->from();
+				return resPt;
+			}
+
 			Vector2D<T> toVector() const
 			{
 				return Vector2D<T>(mTo.x()-mFrom.x(),mTo.y()-mFrom.y());

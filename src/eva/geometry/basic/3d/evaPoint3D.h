@@ -44,6 +44,7 @@ namespace eva
 			:AbstractPoint<T,3>(pt,vec){};
 			Point3D(const FixedArray<T,3>& array)
 			:AbstractPoint<T,3>(array){};
+			virtual ~Point3D(){};
 
 			T& x(){return (*this)[0];};
 			const T& x() const {return (*this)[0];};

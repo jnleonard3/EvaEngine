@@ -30,7 +30,10 @@
 
 #include "math.h"
 
+#include <iostream>
+
 const e_double64 IntelligentAgent::LOOKAHEAD_CONSTANT = 1.5;
+const e_double64 IntelligentAgent::MAX_VELOCITY_VALUE = 15.0;
 const e_double64 IntelligentAgent::MAX_DECELERATION_VALUE = 8.0;
 
 const eva::Vector2Dd getOrientedVector(e_float32 orient)
@@ -40,6 +43,11 @@ const eva::Vector2Dd getOrientedVector(e_float32 orient)
 
 void IntelligentAgent::act()
 {
+	if(mVelocityMagnitude < 13.0)
+		mAccelerationMagnitude = 0.25;
+	else
+		mAccelerationMagnitude = 0.0;
+	/*
 	// If we are waiting, remain waiting until orders come in
 	if(mState == STATE_WAITING)
 		return;
@@ -60,6 +68,7 @@ void IntelligentAgent::act()
 	{
 		//if(mState == STATE_STOPPED)
 	}
+	*/
 
 }
 
@@ -74,15 +83,23 @@ void IntelligentAgent::updatePosition(e_float32 secondsElapsed)
 	directionVector *= secondsElapsed;
 	mBounds.move(directionVector);
 
-	e_float32 angle = start.angleBetween(directionVector);
-	if(mSteeringWheelOffset < 0)
-		angle *= -1.0;
-	mBounds.rotate(angle);
+	if(directionVector.magnitude() != 0.0)
+	{
+		e_float32 angle = start.angleBetween(directionVector);
+		if(mSteeringWheelOffset < 0)
+			angle *= -1.0;
+		mBounds.rotate(angle);
+	}
 
-	mVelocityMagnitude += mAccelerationMagnitude;
+	mVelocityMagnitude += mAccelerationMagnitude*secondsElapsed;
 	if(mVelocityMagnitude < 0.0)
 	{
 		mVelocityMagnitude = 0.0;
+		mAccelerationMagnitude = 0.0;
+	}
+	else if(mVelocityMagnitude > MAX_VELOCITY_VALUE)
+	{
+		mVelocityMagnitude = MAX_VELOCITY_VALUE;
 		mAccelerationMagnitude = 0.0;
 	}
 }

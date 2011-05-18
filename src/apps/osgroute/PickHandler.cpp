@@ -1,4 +1,5 @@
 #include "PickHandler.h"
+#include "OsgHelper.h"
 
 #include "eva/osg/route/RouteGraphVisualizer.h"
 #include "eva/route/evaRouteNode.h"
@@ -49,19 +50,19 @@ void PickHandler::pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea)
 
     		mRoot->removeChild(mClicked);
 
-    		firstNode = secondNode;
-    		secondNode = mGraph.findClosest(hitr->getWorldIntersectPoint().x(),hitr->getWorldIntersectPoint().y(),hitr->getWorldIntersectPoint().z());
-    		if(firstNode && secondNode)
+    		mFirstPoint = mSecondPoint;
+    		mSecondPoint = eva::Point3Dd(hitr->getWorldIntersectPoint().x(),hitr->getWorldIntersectPoint().y(),hitr->getWorldIntersectPoint().z());
+    		if(isActive)
     		{
-    			std::list<eva::RoutePathElement> pathResults;
-    			mGraph.findPath(*firstNode,*secondNode,pathResults);
-
+    			const eva::PathNode *path = mGraph.findPath(mFirstPoint,mSecondPoint);
 				mClicked = new osg::Group;
-				osg::Group *newNodeDrawn = eva::RouteGraphVisualizer::drawRoutePath(pathResults,1.0);
+				osg::Group *newNodeDrawn = eva::RouteGraphVisualizer::drawRoutePath(path,1.0);
 				mClicked->addChild(newNodeDrawn);
 
 				mRoot->addChild(mClicked);
     		}
+    		else
+    			isActive = true;
         }
     }
 }

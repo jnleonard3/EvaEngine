@@ -24,6 +24,23 @@
 
 #include "IntelligentAgentManager.h"
 
+void IntelligentAgentManager::addNewAgent(e_double64 x, e_double64 y, e_float32 orientation)
+{
+	mAgentVector.push_back(IntelligentAgent(*this, eva::Point2Dd(x,y), orientation));
+}
+
+void IntelligentAgentManager::everybodyAct()
+{
+	for(e_uint32 i = 0; i < mAgentVector.size(); ++i)
+		mAgentVector[i].act();
+}
+
+void IntelligentAgentManager::updatePositions(e_float32 secondsElapsed)
+{
+	for(e_uint32 i = 0; i < mAgentVector.size(); ++i)
+		mAgentVector[i].updatePosition(secondsElapsed);
+}
+
 bool IntelligentAgentManager::losQuery(eva::Line2Dd line, eva::Point2Dd &hit) const
 {
 	IntelligentAgentQuadtreeVisitor visitor;

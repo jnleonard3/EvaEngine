@@ -4,6 +4,7 @@
 #include "eva/Typedefs.h"
 #include "eva/math/evaVector3D.h"
 #include "eva/geometry/basic/3d/evaLine3D.h"
+#include "eva/geometry/basic/3d/evaCuboid.h"
 
 namespace eva
 {
@@ -40,6 +41,7 @@ namespace eva
 			e_double64 distance() const;
 			Vector3Dd toVector() const;
 			const Line3Dd toLine() const;
+			const Cuboidd getBoundingBox() const;
 
 			void invalidate() {mType = ROUTEEDGE_INVALID;};
 			void clear();

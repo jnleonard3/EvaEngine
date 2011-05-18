@@ -22,82 +22,82 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EVA_FIXEDPOLYGON_H_
-#define EVA_FIXEDPOLYGON_H_
-
+#ifndef EVA_FIXEDPOLYHEDRON_H_
+#define EVA_FIXEDPOLYHEDRON_H_
+	
 #include "eva/Typedefs.h"
-#include "eva/math/evaVector2D.h"
-#include "eva/geometry/basic/2d/evaPoint2D.h"
-#include "eva/geometry/basic/2d/evaLine2D.h"
+#include "eva/math/evaVector3D.h"
+#include "eva/geometry/basic/3d/evaPoint3D.h"
+#include "eva/geometry/basic/3d/evaLine3D.h"
 
 namespace eva
 {
 	template <class T, e_uchar8 N>
-	class FixedPolygon
+	class FixedPolyhedron
 	{
 		public:
-			FixedPolygon():mCenter(),mOrientation(0){};
-			FixedPolygon(const Point2D<T>& center):mCenter(center),mOrientation(0){};
-			virtual ~FixedPolygon(){};
+			FixedPolyhedron():mCenter(),mOrientation(3,3),mNumEdges(0),mEdges(0){};
+			FixedPolyhedron(const Point3D<T>& center):mCenter(center),mOrientation(3,3),mNumEdges(0),mEdges(0){};
+			virtual ~FixedPolyhedron(){ delete mEdges; };
 
-			const Point2D<T>& getCenter() const { return mCenter; };
-			const e_float32& getOrientation() const { return mOrientation; };
-			const Point2D<T>* const getVerticies() const { return mVerticies; };
-			const Line2D<T>* const getEdges() const { return mEdges; };
-			e_uchar8 getNumOfEdges() const { return N; };
+			const Point3D<T>& getCenter() const { return mCenter; };
+			const Matrix<T>& getOrientation() const { return mOrientation; };
+			const Point3D<T>* const getVerticies() const { return mVerticies; };
+			const Line3D<T>* const getEdges() const { return mEdges; };
+			e_uchar8 getNumOfEdges() const { return mNumEdges; };
 
-			void move(const Point2D<T>& to)
+			void move(const Point3D<T>& to)
 			{
 				this->getCenter() = to;
 				this->recalculate();
 			}
 
-			void move(const Vector2D<T>& trans)
+			void move(const Vector3D<T>& trans)
 			{
 				this->getCenter() += trans;
 				this->recalculate();
 			}
 
-			void rotate(e_float32 angle)
+			void rotate(const Matrix<T> &mat)
 			{
-				Vector2D<T>* vectors = this->getVectors();
-				for(e_uchar8 i = 0; i < this->getNumOfEdges(); ++i)
-					vectors[i].rotate(angle);
-				this->getOrientation() += angle;
+				Vector3D<T>* vectors = this->getVectors();
+				for(e_uchar8 i = 0; i < N; ++i)
+					vectors[i].rotate(mat);
+				this->getOrientation() += mat;
 				this->recalculate();
 			}
 
-			const FixedPolygon<T,N>& constRef() const { return *this; };
+			const FixedPolyhedron<T,N>& constRef() const { return *this; };
 
 		protected:
-			virtual Vector2D<T>* getVectors() { return mPointVectors; };
-			virtual const Vector2D<T>* const getVectors() const { return mPointVectors; };
-			Point2D<T>& getCenter() { return mCenter; };
+			virtual Vector3D<T>* getVectors() { return mPointVectors; };
+			virtual const Vector3D<T>* const getVectors() const { return mPointVectors; };
+			Point3D<T>& getCenter() { return mCenter; };
 			e_float32& getOrientation() { return mOrientation; };
-			Point2D<T>* getVerticies() { return mVerticies; };
-			Line2D<T>* getEdges() { return mEdges; };
+			Point3D<T>* getVerticies() { return mVerticies; };
+			Line3D<T>* getEdges() { return mEdges; };
 
 			virtual void recalculate()
 			{
-				Vector2D<T>* vectors = this->getVectors();
-				Point2D<T>* verticies = this->getVerticies();
+				Vector3D<T>* vectors = this->getVectors();
+				Point3D<T>* verticies = this->getVerticies();
 				for(e_uchar8 i = 0; i < this->getNumOfEdges(); ++i)
 					verticies[i] = this->getCenter() + vectors[i];
 
-				Line2D<T>* edges = this->getEdges();
-				for(e_uchar8 i = 0; i+1 < this->getNumOfEdges(); ++i)
-					edges[i] = Line2D<T>(verticies[i],verticies[i+1]);
-				edges[N-1] = Line2D<T>(verticies[N-1],verticies[0]);
+				this->recalculateEdges();
 			}
+
+			virtual void recalculateEdges(){};
 
 		private:
 			// Structural Information
-			Point2D<T> mCenter;
-			Vector2D<T> mPointVectors[N];
-			e_float32 mOrientation;
+			Point3D<T> mCenter;
+			Vector3D<T> mPointVectors[N];
+			Matrix<T> mOrientation;
 			// Calculated Values
-			Point2D<T> mVerticies[N];
-			Line2D<T> mEdges[N];
+			Point3D<T> mVerticies[N];
+			e_uchar8 mNumEdges;
+			Line3D<T> *mEdges;
 	};
 }
 

@@ -13,17 +13,18 @@
 #include <osgGA/TrackballManipulator>
 #include <osgGA/UFOManipulator>
 
+#include "eva/geometry/basic/3d/evaPoint3D.h"
+
 namespace eva
 {
 	class RouteGraph;
-	class RouteNode;
 }
 
 class PickHandler : public osgGA::GUIEventHandler
 {
 	public:
 		PickHandler(osg::Group *root, eva::RouteGraph &graph, osg::Group *routeNodesGraph)
-		:mGraph(graph),mRoot(root),mClicked(0),mRouteNodesGraph(routeNodesGraph),firstNode(0),secondNode(0){};
+		:mGraph(graph),mRoot(root),mClicked(0),mRouteNodesGraph(routeNodesGraph),isActive(false),mFirstPoint(),mSecondPoint(){};
 		virtual ~PickHandler(){};
 
 		bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
@@ -31,7 +32,8 @@ class PickHandler : public osgGA::GUIEventHandler
 	private:
 		eva::RouteGraph &mGraph;
 		osg::Group *mRoot,*mClicked, *mRouteNodesGraph;
-		eva::RouteNode *firstNode, *secondNode;
+		bool isActive;
+		eva::Point3Dd mFirstPoint, mSecondPoint;
 };
 
-#endif /* PICKHANDLER_H_ */
+#endif

@@ -50,6 +50,13 @@ namespace eva
 		return Line3Dd(0.0,0.0,0.0,0.0,0.0,0.0);
 	}
 
+	const Cuboidd RouteGraphEdge::getBoundingBox() const
+	{
+		Line3Dd line = this->toLine();
+		Point3Dd a = line.from(), b = line.to();
+		return Cuboidd(std::min(a.x(),b.x()),std::max(a.x(),b.x())+1,std::min(a.y(),b.y()),std::max(a.y(),b.y())+1,std::min(a.z(),b.z()),std::max(a.z(),b.z())+1);
+	}
+
 	void RouteGraphEdge::clear()
 	{
 		delete mConnectedEdges;

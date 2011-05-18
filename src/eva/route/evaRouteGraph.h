@@ -1,33 +1,71 @@
+/*
+ *  Copyright (c) 2011, EvaEngine Project
+ *	All rights reserved.
+ *
+ *	Redistribution and use in source and binary forms, with or without
+ *	modification, are permitted provided that the following conditions are met:
+ *		* Redistributions of source code must retain the above copyright
+ *		  notice, this list of conditions and the following disclaimer.
+ *		* Redistributions in binary form must reproduce the above copyright
+ *		  notice, this list of conditions and the following disclaimer in the
+ *		  documentation and/or other materials provided with the distribution.
+ *
+ *	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *	DISCLAIMED. IN NO EVENT SHALL THE EVAENGINE PROEJCT BE LIABLE FOR ANY
+ *	DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #ifndef EVA_ROUTEGRAPH_H_
 #define EVA_ROUTEGRAPH_H_
 
 #include "eva/Typedefs.h"
+#include "eva/geometry/basic/3d/evaLine3D.h"
 #include "eva/geometry/basic/3d/evaPoint3D.h"
 #include "eva/structures/evaSimpleDynamicArray.h"
 #include "eva/route/evaRouteGraphEdge.h"
 #include "eva/route/evaRouteNode.h"
 #include "eva/structures/evaBlockArray.h"
 #include "eva/structures/RStarTree.h"
+#include "eva/route/evaPath.h"
 
 #include <list>
-#include <map>
 
 namespace eva
 {
-	class RouteGraphEdge;
-	class RouteNode;
-
-	struct RoutePathElement
+	struct RouteElement
 	{
-		RoutePathElement(RouteNode *node, RouteGraphEdge *edge):mNode(node),mTravelEdge(edge){};
-		RouteNode *mNode;
-		RouteGraphEdge *mTravelEdge;
+		union RouteElements
+		{
+			RouteNode *mNode;
+			RouteGraphEdge *mEdge;
+		};
+
+		RouteElement():isNode(true){};
+
+		bool isValid() const { if(data.mNode) return true; return false; }
+
+		RouteNode& getNode() { return *(data.mNode); };
+		const RouteNode& getNode() const { return *(data.mNode); };
+		RouteGraphEdge& getEdge() { return *(data.mEdge); }
+		const RouteGraphEdge& getEdge() const { return *(data.mEdge); }
+
+		void setNode(RouteNode& node) { data.mNode = &node; };
+		void setEdge(RouteGraphEdge& edge) { isNode = false; data.mEdge = &edge; };
+
+		bool isNode;
+		RouteElements data;
 	};
 
-	class RouteGraph
+	class RouteGraph : public PathFinder
 	{
 		public:
-
 			RouteGraph();
 			RouteGraph(e_uint32 maxNodeEdges, e_uint32 maxEdgeEdges);
 
@@ -41,29 +79,21 @@ namespace eva
 			std::vector<RouteNode*> queryNodesInArea(e_uint32 x1, e_uint32 x2, e_uint32 y1, e_uint32 y2, e_uint32 z1, e_uint32 z2);
 			std::vector<RouteNode*> queryNodesInArea(e_uint32 x, e_uint32 y, e_uint32 z, e_uint32 radius);
 
-			RouteNode* findClosest(e_double64 x, e_double64 y, e_double64 z);
-			RouteGraphEdge* findClosestRoute(const Point3Dd& query, Point3Dd& pt);
+			RouteNode const * findClosest(const Point3Dd& pt) const;
 
-			struct RoutePathParameters
-			{
-				bool directionIgnored;
-				bool useSemidirectEdges;
-				bool takeIndirectEdges;
-			};
-
-			bool findPath(RouteNode &nodeFrom, RouteNode &nodeTo, std::list<RoutePathElement> &pathResult) const;
-			bool findPath(RouteNode &nodeFrom, RouteNode &nodeTo, std::list<RoutePathElement> &pathResult, RoutePathParameters &parameters) const;
+			PathNode* findPath(const Point3Dd &ptFrom, const Point3Dd &ptTo) const;
+			PathNode* findPath(const Point3Dd &ptFrom, const Point3Dd &ptTo, PathParameters &parameters) const;
 
 			const BlockArray<RouteNode>& getNodes() const { return mNodes; };
 			const BlockArray<RouteGraphEdge>& getEdges() const { return mGraphEdges; };
 
+			typedef RStarTree<RouteElement,3,5,50> RouteGraphRTree;
+
 		private:
 			// General Functions
-
-			bool isNodeInGraph(RouteNode &node) const;
+			bool isNodeInGraph(const RouteNode &node) const;
 
 			// Storage for elements of the graph
-
 			const e_uint32 mMaxNodeEdgesFrom;
 			const e_uint32 mMaxNodeEdgesTo;
 
@@ -71,7 +101,6 @@ namespace eva
 			BlockArray<RouteGraphEdge> mGraphEdges;
 
 			// Storage for the array of pointers to edges and related structures and functions
-
 			struct Range
 			{
 				Range(e_uint32 low, e_uint32 high):mLow(low),mHigh(high){};
@@ -87,150 +116,6 @@ namespace eva
 
 			SimpleDynamicArray<RouteGraphEdge*> mEdgesPtrArray;
 			std::list<Range> mAvailableElements;
-
-			// Storage and helper functions for retrieving cached paths of indirect edges
-
-			struct MapKey
-			{
-				Point3Dd mFrom, mTo;
-			};
-
-			std::vector<std::list<RoutePathElement> > mCachedPaths;
-			std::map<MapKey,std::list<RoutePathElement>*> mIndirectPathMap;
-
-			struct RouteNodeRecord : public RoutePathElement
-			{
-				RouteNodeRecord():RoutePathElement(0,0),mCostSoFar(0),mEstimatedTotalCost(0),mPreviousRecord(0){};
-				RouteNodeRecord(RouteNode *node,RouteGraphEdge *traveledge)
-				: RoutePathElement(node,traveledge),mCostSoFar(0.0),mEstimatedTotalCost(0.0),mPreviousRecord(0){};
-				RouteNodeRecord(RouteNode *node,RouteGraphEdge *traveledge,e_double64 costsofar,e_double64 estimatedtotalcost,RouteNodeRecord *previous)
-				: RoutePathElement(node,traveledge),mCostSoFar(costsofar),mEstimatedTotalCost(estimatedtotalcost),mPreviousRecord(previous){};
-				e_double64 mCostSoFar;
-				e_double64 mEstimatedTotalCost;
-				RouteNodeRecord *mPreviousRecord;
-			};
-
-			// R-Tree structure and helper functions for spatial querying (nearest neighbor, area query)
-
-			union RTreeLeafData
-			{
-				RouteNode *mNode;
-				RouteGraphEdge *mEdge;
-			};
-
-			struct RTreeLeaf
-			{
-				RTreeLeaf():isNode(true){};
-				RTreeLeaf(bool isnode, e_int32 x, e_int32 y, e_int32 z):isNode(isnode){	boundingBox.edges[0].first = x-1;
-																							boundingBox.edges[0].second = x+1;
-																							boundingBox.edges[1].first = y-1;
-																							boundingBox.edges[1].second = y+1;
-																							boundingBox.edges[2].first = z-1;
-																							boundingBox.edges[2].second = z+1;
-				};
-				RTreeLeaf(bool isnode, e_int32 x1, e_int32 x2, e_int32 y1, e_int32 y2, e_int32 z1, e_int32 z2):isNode(isnode){	boundingBox.edges[0].first = std::min(x1,x2)-1;
-																																boundingBox.edges[0].second = std::max(x1,x2)+1;
-																																boundingBox.edges[1].first = std::min(y1,y2)-1;
-																																boundingBox.edges[1].second = std::max(y1,y2)+1;
-																																boundingBox.edges[2].first = std::min(z1,z2)-1;
-																																boundingBox.edges[2].second = std::max(z1,z2)+1;
-				};
-				bool isNode;
-				RStarTree<RTreeLeaf,3,5,50>::BoundingBox boundingBox;
-				RTreeLeafData data;
-			};
-
-			struct NearestNeighborQuery
-			{
-				RouteNode *mClosest;
-				RouteGraphEdge *mClosestEdge;
-
-				Point3Dd mQueryPoint;
-				e_double64 mMaxDistance;
-				bool mQueryNode, mQueryEdge;
-
-				NearestNeighborQuery():mClosest(0),mQueryPoint(),mMaxDistance(1000000.0),mQueryNode(true),mQueryEdge(false){};
-				bool updateDistance(e_double64 distance){ if(distance < mMaxDistance) { mMaxDistance = distance; return true; } return false; };
-			};
-
-			template <typename Node, typename Leaf>
-			struct NearestNeighborAcceptor
-			{
-				const NearestNeighborQuery &mQuery;
-				NearestNeighborAcceptor(const NearestNeighborQuery &query):mQuery(query){};
-
-				typename Node::BoundingBox updateBounds() const
-				{
-					typename Node::BoundingBox bounds;
-					e_uint32 dist = (e_uint32)mQuery.mMaxDistance;
-					bounds.edges[0].first = mQuery.mQueryPoint.x() - dist;
-					bounds.edges[0].second = mQuery.mQueryPoint.x() + dist;
-					bounds.edges[1].first = mQuery.mQueryPoint.y() - dist;
-					bounds.edges[1].second = mQuery.mQueryPoint.y() + dist;
-					bounds.edges[2].first = mQuery.mQueryPoint.z() - dist;
-					bounds.edges[2].second = mQuery.mQueryPoint.z() + dist;
-					return bounds;
-				}
-
-				bool operator()(const Node * const node) const
-				{
-					return updateBounds().overlaps(node->bound);
-				}
-
-				bool operator()(const Leaf * const leaf) const
-				{
-					return updateBounds().encloses(leaf->bound);
-				}
-
-				private: NearestNeighborAcceptor(){}
-			};
-
-			template <typename Leaf>
-			struct NearestNeighborVisitor : public NearestNeighborQuery
-			{
-				bool ContinueVisiting;
-				NearestNeighborVisitor(Point3Dd pt) : ContinueVisiting(true) { mQueryPoint = pt; };
-
-				bool operator()(Leaf* leaf)
-				{
-					RTreeLeaf &rleaf = leaf->leaf;
-					if(mQueryNode && rleaf.isNode)
-					{
-						RouteNode *node = rleaf.data.mNode;
-						if(updateDistance(mQueryPoint.distance(node->getPoint())))
-							mClosest = node;
-					}
-					else if(mQueryEdge && !rleaf.isNode)
-					{
-
-					}
-					return true;
-				}
-			};
-
-			template <typename Leaf>
-			struct GatherNodesVisitor
-			{
-				std::vector<Leaf*> mNodes;
-				bool ContinueVisiting;
-				GatherNodesVisitor() : ContinueVisiting(true) {};
-				~GatherNodesVisitor() {};
-
-				std::vector<Leaf*> getResults() { return mNodes; };
-
-				bool operator()(Leaf* leaf)
-				{
-					mNodes.push_back(leaf);
-					return true;
-				}
-			};
-
-			typedef RStarTree<RTreeLeaf,3,5,50> RouteGraphRTree;
-			typedef GatherNodesVisitor<RouteGraphRTree::Leaf> RouteGraphGatherNodesVisitor;
-			typedef NearestNeighborAcceptor<RouteGraphRTree::Node, RouteGraphRTree::Leaf> RouteGraphNearestNeighborAcceptor;
-			typedef NearestNeighborVisitor<RouteGraphRTree::Leaf> RouteGraphNearestNeighborVisitor;
-
-			static RouteGraphRTree::BoundingBox createBoundingBox(e_int32 x1, e_int32 x2, e_int32 y1, e_int32 y2, e_int32 z1, e_int32 z2);
 
 			RouteGraphRTree mRTree;
 	};

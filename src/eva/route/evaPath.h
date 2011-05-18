@@ -22,56 +22,58 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EVA_LINE3D_H_
-#define EVA_LINE3D_H_
+#ifndef EVA_PATH_H_
+#define EVA_PATH_H_
 
 #include "eva/Typedefs.h"
-#include "math.h"
 #include "eva/geometry/basic/3d/evaPoint3D.h"
-#include "eva/math/evaMathCommon.h"
-#include "eva/math/evaVector3D.h"
-
+#include "eva/geometry/basic/3d/evaLine3D.h"
+	
 namespace eva
 {
-	template <class T>
-	class Line3D
+	struct PathNode;
+	struct PathEdge;
+
+	struct PathNode
 	{
-		public:
-			Line3D(T x1, T y1, T z1, T x2, T y2, T z2):mFrom(x1,y1,z1),mTo(x2,y2,z2){};
-			Line3D(const Point3D<T> &lhs, const Point3D<T> &rhs):mFrom(lhs),mTo(rhs){};
-
-			const Point3D<T>& from() const { return mFrom; };
-			const Point3D<T>& to() const { return mTo; };
-
-			T length() const { return mFrom.distance(mTo); };
-
-			const Point3D<T> projectOnto(const Point3D<T>& pt) const
-			{
-				Vector3D<T> vec = this->toVector();
-				const Point3D<T> resPt = pt.projectOnto(this->from(),vec);
-				T length = this->length();
-				if(resPt.distance(this->from()) > length)
-					return this->to();
-				else if(resPt.distance(this->to()) > length)
-					return this->from();
-				return resPt;
-			}
-
-			const Vector3D<T> toVector() const
-			{
-				return Vector3D<T>(mTo.x()-mFrom.x(),mTo.y()-mFrom.y(),mTo.z()-mFrom.z());
-			}
-
-		private:
-			Point3D<T> mFrom, mTo;
+		PathNode(const Point3Dd& pt):mPoint(pt),mNext(0){};
+		Point3Dd mPoint;
+		PathEdge *mNext;
 	};
 
-	typedef Line3D<e_uchar8> Line3Duc;
-	typedef Line3D<e_char8> Line3Dc;
-	typedef Line3D<e_uint32> Line3Dui;
-	typedef Line3D<e_int32> Line3Di;
-	typedef Line3D<e_float32> Line3Df;
-	typedef Line3D<e_double64> Line3Dd;
-}
+	enum PathEdgeTypes
+	{
+		PATH_EDGE = 0,
+		PATH_MERGE_EDGE,
+		PATH_EDGE_COUNT,
+	};
 
-#endif /* EVALINE3D_H_ */
+	struct PathEdge
+	{
+		virtual e_uchar8 getType() const { return PATH_EDGE; };
+		PathNode *mNext;
+	};
+
+	struct MergePathEdge : public PathEdge
+	{
+		virtual e_uchar8 getType() const { return PATH_MERGE_EDGE; };
+		e_uchar8 mNumPaths;
+		Line3Dd *mPaths;
+	};
+
+	struct PathParameters
+	{
+		bool directionIgnored;
+		bool useSemidirectEdges;
+		bool takeIndirectEdges;
+	};
+
+	class PathFinder
+	{
+		public:
+			virtual PathNode* findPath(const Point3Dd &ptFrom, const Point3Dd &ptTo) const = 0;
+			virtual PathNode* findPath(const Point3Dd &ptFrom, const Point3Dd &ptTo, PathParameters &parameters) const = 0;
+	};
+};
+
+#endif

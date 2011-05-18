@@ -31,6 +31,7 @@
 #include "eva/geometry/basic/3d/evaPoint3D.h"
 #include "eva/geometry/basic/2d/evaPoint2D.h"
 #include "eva/geometry/basic/2d/evaSquare.h"
+#include "IntelligentAgentManager.h"
 
 #include <osg/Node>
 #include <osg/Group>
@@ -38,11 +39,16 @@
 #include <osg/Geometry>
 #include <osg/Texture2D>
 #include <osg/StateSet>
+#include <osg/PositionAttitudeTransform>
 
 class OsgHelper
 {
 	public:
 		virtual ~OsgHelper(){};
+
+		static osg::Group* drawPoint(const eva::Point3Dd &pt);
+
+		static osg::Group* drawLine(const eva::Line3Dd &line);
 
 		static osg::Group* drawSquare(const eva::Squared rect, e_double64 z);
 
@@ -54,8 +60,28 @@ class OsgHelper
 
 		static osg::Vec3 eva2DPointToOsgVec(const eva::Point2Dd& pt, e_double64 z);
 
+		static osg::Vec3 eva3DPointToOsgVec(const eva::Point3Dd& pt);
+
+		class IntelligentAgentRender
+		{
+			public:
+				IntelligentAgentRender(const IntelligentAgentManager& manager)
+				:mRenderRoot(0),mManager(manager),mAgentGroup(0){this->repopulate();};
+
+				void redraw();
+				void repopulate();
+
+				osg::Group* mRenderRoot;
+
+			private:
+				const IntelligentAgentManager& mManager;
+				std::vector<osg::PositionAttitudeTransform*> mPATs;
+
+				osg::Group* mAgentGroup;
+		};
+
 	private:
 		OsgHelper(){};
 };
 
-#endif /* OSGHELPER_H_ */
+#endif

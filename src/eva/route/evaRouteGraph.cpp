@@ -1,9 +1,138 @@
+/*
+ *  Copyright (c) 2011, EvaEngine Project
+ *	All rights reserved.
+ *
+ *	Redistribution and use in source and binary forms, with or without
+ *	modification, are permitted provided that the following conditions are met:
+ *		* Redistributions of source code must retain the above copyright
+ *		  notice, this list of conditions and the following disclaimer.
+ *		* Redistributions in binary form must reproduce the above copyright
+ *		  notice, this list of conditions and the following disclaimer in the
+ *		  documentation and/or other materials provided with the distribution.
+ *
+ *	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *	DISCLAIMED. IN NO EVENT SHALL THE EVAENGINE PROEJCT BE LIABLE FOR ANY
+ *	DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "evaRouteGraph.h"
 #include "eva/route/evaRouteNode.h"
+#include "eva/route/evaTemporaryRouteNode.h"
 #include "eva/route/evaRouteGraphEdge.h"
 
 namespace eva
 {
+	struct NearestNeighborQuery
+	{
+		RouteNode const *mClosestNode;
+
+		Point3Dd mQueryPoint;
+		e_double64 mMaxNodeDistance;
+
+		NearestNeighborQuery():mQueryPoint(),mMaxNodeDistance(1000000.0){};
+		bool updateNodeDistance(e_double64 distance){ if(distance < mMaxNodeDistance) { mMaxNodeDistance = distance; return true; } return false; };
+	};
+
+	template <typename Node, typename Leaf>
+	struct NearestNeighborAcceptor
+	{
+		const NearestNeighborQuery &mQuery;
+		NearestNeighborAcceptor(const NearestNeighborQuery &query):mQuery(query){};
+
+		typename Node::BoundingBox updateBounds() const
+		{
+			typename Node::BoundingBox bounds;
+			e_uint32 dist = (e_uint32)mQuery.mMaxNodeDistance + 1;
+			bounds.edges[0].first = (e_uint32)mQuery.mQueryPoint.x() - dist;
+			bounds.edges[0].second = (e_uint32)mQuery.mQueryPoint.x() + dist;
+			bounds.edges[1].first = (e_uint32)mQuery.mQueryPoint.y() - dist;
+			bounds.edges[1].second = (e_uint32)mQuery.mQueryPoint.y() + dist;
+			bounds.edges[2].first = (e_uint32)mQuery.mQueryPoint.z() - dist;
+			bounds.edges[2].second = (e_uint32)mQuery.mQueryPoint.z() + dist;
+			return bounds;
+		}
+
+		bool operator()(const Node * const node) const
+		{
+			return updateBounds().overlaps(node->bound);
+		}
+
+		bool operator()(const Leaf * const leaf) const
+		{
+			return updateBounds().encloses(leaf->bound);
+		}
+
+		private: NearestNeighborAcceptor(){}
+	};
+
+	struct NearestNeighborVisitor : public NearestNeighborQuery
+	{
+		bool ContinueVisiting;
+		NearestNeighborVisitor(Point3Dd pt):ContinueVisiting(true){ mQueryPoint = pt; };
+
+		bool operator()(RouteGraph::RouteGraphRTree::Leaf const * const leaf)
+		{
+			if(leaf->leaf.isNode)
+			{
+				const eva::RouteNode &node = leaf->leaf.getNode();
+				if(updateNodeDistance(mQueryPoint.distance(node.getPoint())))
+					mClosestNode = &node;
+			}
+			return true;
+		}
+	};
+
+	template <typename Leaf>
+	struct GatherNodesVisitor
+	{
+		std::vector<Leaf*> mNodes;
+		bool ContinueVisiting;
+		GatherNodesVisitor() : ContinueVisiting(true) {};
+		~GatherNodesVisitor() {};
+
+		std::vector<Leaf*> getResults() { return mNodes; };
+
+		bool operator()(Leaf* leaf)
+		{
+			mNodes.push_back(leaf);
+			return true;
+		}
+	};
+
+	const RouteGraph::RouteGraphRTree::BoundingBox cuboidToBoundingBox(const Cuboidd &cube)
+	{
+		const Point3Dd* const points = cube.getVerticies();
+		RouteGraph::RouteGraphRTree::BoundingBox box;
+		box.edges[0].first = points[0].x();
+		box.edges[0].second = points[6].x();
+		box.edges[1].first = points[0].y();
+		box.edges[1].second = points[6].y();
+		box.edges[2].first = points[0].z();
+		box.edges[2].second = points[6].z();
+		return box;
+	}
+
+	const RouteGraph::RouteGraphRTree::BoundingBox getRouteElemBounds(const RouteElement& elem)
+	{
+		if(elem.isValid())
+		{
+			Cuboidd cubeoid;
+			if(elem.isNode)
+				cubeoid = elem.getNode().getBoundingBox();
+			else
+				cubeoid = elem.getEdge().getBoundingBox();
+			return cuboidToBoundingBox(cubeoid);
+		}
+		return RouteGraph::RouteGraphRTree::BoundingBox();
+	}
+
 	RouteGraph::RouteGraph()
 	:mMaxNodeEdgesFrom(5), mMaxNodeEdgesTo(5),mMaxNodeEdges(10),mMaxEdgeEdges(10), mEdgesPtrArray(0), mAvailableElements()
 	{
@@ -24,9 +153,9 @@ namespace eva
 		RouteNode &node = mNodes.pushBack(RouteNode(pt, mMaxNodeEdgesFrom, fromEdgePtr, mMaxNodeEdgesTo, toEdgePtr));
 
 		// Insert into R-Tree
-		RTreeLeaf leaf(true,(e_uint32)pt.x(),(e_uint32)pt.y(),(e_uint32)pt.z());
-		leaf.data.mNode = &node;
-		mRTree.Insert(leaf,leaf.boundingBox);
+		RouteElement leaf;
+		leaf.setNode(node);
+		mRTree.Insert(leaf,getRouteElemBounds(leaf));
 
 		return node;
 	}
@@ -36,9 +165,9 @@ namespace eva
 		RouteGraphEdge **edgeMemoryStart = allocateSpace(mMaxEdgeEdges);
 		RouteGraphEdge &edge = mGraphEdges.pushBack(RouteGraphEdge(ROUTEEDGE_DIRECT, &nodeTo, &nodeFrom, mMaxEdgeEdges, edgeMemoryStart));
 
-		RTreeLeaf leaf(false,(e_uint32)nodeFrom.getPoint().x(),(e_uint32)nodeTo.getPoint().x(),(e_uint32)nodeFrom.getPoint().y(),(e_uint32)nodeTo.getPoint().y(),(e_uint32)nodeFrom.getPoint().z(),(e_uint32)nodeTo.getPoint().z());
-		leaf.data.mEdge = &edge;
-		mRTree.Insert(leaf,leaf.boundingBox);
+		RouteElement leaf;
+		leaf.setEdge(edge);
+		mRTree.Insert(leaf,getRouteElemBounds(leaf));
 
 		for(e_uchar8 i = 0; i < nodeFrom.getNumEdgesFrom(); ++i)
 			if(nodeFrom.getFromEdge(i) == 0 || nodeFrom.getFromEdge(i)->getType() == ROUTEEDGE_INVALID)
@@ -77,10 +206,11 @@ namespace eva
 	{
 		std::vector<RouteNode*> results;
 
-		RouteGraphRTree::AcceptOverlapping acceptor(createBoundingBox(x1,x2,y1,y2,z1,z2));
-		RouteGraphGatherNodesVisitor visitor;
+		Cuboidd box(x1,x2,y1,y2,z1,z2);
+		RouteGraphRTree::AcceptOverlapping acceptor(cuboidToBoundingBox(box));
+		GatherNodesVisitor<RouteGraphRTree::Leaf> visitor;
 
-		visitor = mRTree.Query<RouteGraphRTree::AcceptOverlapping,RouteGraphGatherNodesVisitor>(acceptor,visitor);
+		visitor = mRTree.Query<RouteGraphRTree::AcceptOverlapping,GatherNodesVisitor<RouteGraphRTree::Leaf> >(acceptor,visitor);
 
 		for(std::vector<RouteGraphRTree::Leaf*>::iterator i = visitor.getResults().begin(); i != visitor.getResults().end(); ++i)
 			if((*i)->leaf.isNode)
@@ -93,10 +223,11 @@ namespace eva
 	{
 		std::vector<RouteNode*> results;
 
-		RouteGraphRTree::AcceptEnclosing acceptor(createBoundingBox(x-radius,x+radius,y-radius,y+radius,z-radius,z+radius));
-		RouteGraphGatherNodesVisitor visitor;
+		Cuboidd box(Point3Dd(x,y,z),radius);
+		RouteGraphRTree::AcceptEnclosing acceptor(cuboidToBoundingBox(box));
+		GatherNodesVisitor<RouteGraphRTree::Leaf> visitor;
 
-		visitor = mRTree.Query<RouteGraphRTree::AcceptEnclosing,RouteGraphGatherNodesVisitor>(acceptor,visitor);
+		visitor = mRTree.Query<RouteGraphRTree::AcceptEnclosing,GatherNodesVisitor<RouteGraphRTree::Leaf> >(acceptor,visitor);
 
 		for(std::vector<RouteGraphRTree::Leaf*>::iterator i = visitor.mNodes.begin(); i != visitor.mNodes.end(); ++i)
 			if((*i)->leaf.isNode)
@@ -105,24 +236,33 @@ namespace eva
 		return results;
 	}
 
-	RouteNode* RouteGraph::findClosest(e_double64 x, e_double64 y, e_double64 z)
+	RouteNode const * RouteGraph::findClosest(const Point3Dd& pt) const
 	{
-		RouteGraphNearestNeighborVisitor visitor(Point3Dd(x,y,z));
-		RouteGraphNearestNeighborAcceptor acceptor(visitor);
+		NearestNeighborVisitor visitor(pt);
+		NearestNeighborAcceptor<RouteGraphRTree::Node, RouteGraphRTree::Leaf> acceptor(visitor);
 
-		visitor = mRTree.Query<RouteGraphNearestNeighborAcceptor,RouteGraphNearestNeighborVisitor>(acceptor,visitor);
+		visitor = mRTree.Query<NearestNeighborAcceptor<RouteGraphRTree::Node,RouteGraphRTree::Leaf>,NearestNeighborVisitor>(acceptor,visitor);
 
-		return visitor.mClosest;
+		return visitor.mClosestNode;
 	}
 
-	RouteGraphEdge* RouteGraph::findClosestRoute(const Point3Dd& query, Point3Dd& pt)
+	struct RouteNodeRecord
 	{
+		RouteNodeRecord():mNode(0),mTravelEdge(0),mCostSoFar(0),mEstimatedTotalCost(0),mPreviousRecord(0){};
+		RouteNodeRecord(RouteNode const *node,RouteGraphEdge const *traveledge)
+		:mNode(node),mTravelEdge(traveledge),mCostSoFar(0.0),mEstimatedTotalCost(0.0),mPreviousRecord(0){};
+		RouteNodeRecord(RouteNode const *node,RouteGraphEdge const *traveledge,e_double64 costsofar,e_double64 estimatedtotalcost,RouteNodeRecord *previous)
+		:mNode(node),mTravelEdge(traveledge),mCostSoFar(costsofar),mEstimatedTotalCost(estimatedtotalcost),mPreviousRecord(previous){};
+		RouteNode const *mNode;
+		RouteGraphEdge const *mTravelEdge;
+		e_double64 mCostSoFar;
+		e_double64 mEstimatedTotalCost;
+		RouteNodeRecord *mPreviousRecord;
+	};
 
-	}
-
-	bool RouteGraph::findPath(RouteNode &nodeFrom, RouteNode &nodeTo, std::list<RoutePathElement> &pathResult) const
+	PathNode* RouteGraph::findPath(const Point3Dd &ptFrom, const Point3Dd &ptTo) const
 	{
-		bool pathFound = false;
+		const RouteNode &nodeFrom = *(this->findClosest(ptFrom)), &nodeTo = *(this->findClosest(ptTo));
 		std::vector<RouteNodeRecord*> closedSet, openSet;
 		openSet.push_back(new RouteNodeRecord(&nodeFrom,0,0,nodeFrom.getPoint().distance(nodeTo.getPoint()),0));
 		RouteNodeRecord *currentRecord = openSet.front();
@@ -137,7 +277,7 @@ namespace eva
 					currentRecordIndex = i;
 				}
 
-			RouteNode &currentNode = *currentRecord->mNode;
+			const RouteNode &currentNode = *currentRecord->mNode;
 
 			if(&currentNode == &nodeTo)
 				break;
@@ -206,14 +346,59 @@ namespace eva
 			closedSet.push_back(currentRecord);
 		}
 
+		PathNode *pathResult = 0;
 		if(currentRecord->mNode == &nodeTo)
 		{
-			pathFound = true;
+			TemporaryRouteNode tmpNodeFrom(nodeFrom), tmpNodeTo(nodeTo);
+			bool ptHeadingTowardsNodeFrom, ptHeadingTowardsNodeTo;
+			Point3Dd fromNearest, toNearest;
+
+			for(e_uchar8 i = 0; i < nodeTo.getNumEdgesTo(); ++i)
+			{
+				RouteGraphEdge *edge = nodeTo.getToEdge(i);
+				if(currentRecord->mTravelEdge != edge)
+					tmpNodeTo.getToEdge(i)->invalidate();
+			}
+			toNearest = tmpNodeTo.getClosestEdgePointTo(ptTo,&ptHeadingTowardsNodeTo);
+
+			pathResult = new PathNode(toNearest);
+
+			if(ptHeadingTowardsNodeTo)
+				currentRecord = currentRecord->mPreviousRecord;
+
 			while(currentRecord != 0 && currentRecord->mNode != &nodeFrom)
 			{
-				pathResult.push_front(RoutePathElement(currentRecord->mNode,currentRecord->mTravelEdge));
+				PathNode *prevNode = new PathNode(currentRecord->mNode->getPoint());
+				prevNode->mNext = new PathEdge();
+				prevNode->mNext->mNext = pathResult;
+				pathResult = prevNode;
 				currentRecord = currentRecord->mPreviousRecord;
 			}
+
+			if(currentRecord)
+			{
+				for(e_uchar8 i = 0; i < nodeFrom.getNumEdgesFrom(); ++i)
+				{
+					RouteGraphEdge *edge = nodeFrom.getFromEdge(i);
+					if(currentRecord->mTravelEdge != edge)
+						tmpNodeFrom.getFromEdge(i)->invalidate();
+				}
+				fromNearest = tmpNodeFrom.getClosestEdgePointTo(ptFrom,&ptHeadingTowardsNodeFrom);
+
+				if(ptHeadingTowardsNodeFrom)
+				{
+					PathNode *fromNode = new PathNode(currentRecord->mNode->getPoint());
+					fromNode->mNext = new PathEdge();
+					fromNode->mNext->mNext = pathResult;
+					pathResult = fromNode;
+				}
+			}
+
+			PathNode *firstNode = new PathNode(fromNearest);
+			firstNode->mNext = new PathEdge();
+			firstNode->mNext->mNext = pathResult;
+			pathResult = firstNode;
+
 		}
 
 		for(e_uint32 i = 0; i < openSet.size(); ++i)
@@ -222,7 +407,12 @@ namespace eva
 		for(e_uint32 i = 0; i < closedSet.size(); ++i)
 			delete closedSet[i];
 
-		return pathFound;
+		return pathResult;
+	}
+
+	PathNode* RouteGraph::findPath(const Point3Dd &ptFrom, const Point3Dd &ptTo, PathParameters &parameters) const
+	{
+		return false;
 	}
 
 	RouteGraphEdge** RouteGraph::allocateSpace(e_uint32 size)
@@ -266,18 +456,5 @@ namespace eva
 				}
 			}
 		}
-	}
-
-	RouteGraph::RouteGraphRTree::BoundingBox RouteGraph::createBoundingBox(e_int32 x1, e_int32 x2, e_int32 y1, e_int32 y2, e_int32 z1, e_int32 z2)
-	{
-		RouteGraphRTree::BoundingBox boundingBox;
-		boundingBox.edges[0].first = std::min(x1,x2);
-		boundingBox.edges[0].second = std::max(x1,x2);
-		boundingBox.edges[1].first = std::min(y1,y2);
-		boundingBox.edges[1].second = std::max(y1,y2);
-		boundingBox.edges[2].first = std::min(z1,z2);
-		boundingBox.edges[2].second = std::max(z1,z2);
-
-		return boundingBox;
 	}
 }

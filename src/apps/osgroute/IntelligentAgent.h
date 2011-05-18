@@ -32,9 +32,6 @@
 #include "eva/geometry/basic/2d/evaRectangle.h"
 #include "eva/route/evaRouteGraph.h"
 
-
-#include <list>
-
 class IntelligentAgentManager;
 
 enum IntelligentAgentState
@@ -58,13 +55,16 @@ class IntelligentAgent
 		IntelligentAgent(IntelligentAgentManager &manager)
 		:mManager(manager),mState(STATE_WAITING),mBounds(eva::Point2Dd(),eva::Vector2Dd(2.0,5.0)),
 		 mVelocityMagnitude(0.0f),mAccelerationMagnitude(0.0f),mSteeringWheelOffset(0.0f){};
-		IntelligentAgent(IntelligentAgentManager &manager, eva::Point3Dd position, e_float32 orientation)
-		:mManager(manager),mState(STATE_WAITING),mBounds(eva::Point2Dd(position.x(),position.y()),eva::Vector2Dd(2.0,5.0)),
+		IntelligentAgent(IntelligentAgentManager &manager, eva::Point2Dd position, e_float32 orientation)
+		:mManager(manager),mState(STATE_WAITING),mBounds(position,eva::Vector2Dd(2.0,5.0)),
 		 mVelocityMagnitude(0.0f),mAccelerationMagnitude(0.0f),mSteeringWheelOffset(0.0f){mBounds.rotate(orientation);};
+		IntelligentAgent(const IntelligentAgent& agent)
+		:mManager(agent.mManager),mState(STATE_WAITING),mBounds(agent.mBounds),
+		mVelocityMagnitude(0.0f),mAccelerationMagnitude(0.0f),mSteeringWheelOffset(0.0f){};
 
 		void act();
 
-		void giveDirections(std::list<eva::RoutePathElement> &path);
+		void giveDirections(const eva::PathNode *node);
 
 		void updatePosition(e_float32 secondsElapsed);
 
@@ -73,12 +73,19 @@ class IntelligentAgent
 
 		const eva::Rectangled getBounds() const { return mBounds; };
 
+		IntelligentAgent& operator=(const IntelligentAgent& rhs)
+		{
+			if(this != &rhs)
+				*this = IntelligentAgent(*this);
+			return *this;
+		}
+
 	private:
 		IntelligentAgentManager &mManager;
 		e_uchar8 mState;
 		eva::Rectangled mBounds;
 		e_float32 mVelocityMagnitude, mAccelerationMagnitude, mSteeringWheelOffset;
-		std::list<eva::RoutePathElement> mCurrentDirections;
+		const eva::PathNode *mCurrentDirections;
 
 		const IntelligentAgentManager& getManager() const { return mManager; };
 

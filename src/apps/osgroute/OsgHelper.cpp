@@ -24,6 +24,46 @@
 
 #include "OsgHelper.h"
 
+#include <osg/ShapeDrawable>
+
+osg::Group* OsgHelper::drawPoint(const eva::Point3Dd &pt)
+{
+	osg::Group* root = new osg::Group();
+	osg::Box *box = new osg::Box(osg::Vec3(pt.x(),pt.y(),pt.z()), 0.5f);
+	osg::ShapeDrawable *draw = new osg::ShapeDrawable(box);
+	osg::Geode *geode = new osg::Geode();
+	geode->addDrawable(draw);
+	root->addChild(geode);
+	return root;
+}
+
+osg::Group* OsgHelper::drawLine(const eva::Line3Dd &line)
+{
+	osg::Group* root = new osg::Group();
+
+	osg::Geode* baseGeode = new osg::Geode();
+	osg::Geometry* baseGeometry = new osg::Geometry();
+	baseGeode->addDrawable(baseGeometry);
+
+	osg::Vec3Array* baseVertices = new osg::Vec3Array;
+	baseVertices->push_back(eva3DPointToOsgVec(line.from()));
+	baseVertices->push_back(eva3DPointToOsgVec(line.to()));
+	baseGeometry->setVertexArray(baseVertices);
+
+	osg::DrawElementsUInt* lineElems =  new osg::DrawElementsUInt(osg::PrimitiveSet::LINES, 0);
+	lineElems->push_back(0);
+	lineElems->push_back(1);
+	baseGeometry->addPrimitiveSet(lineElems);
+
+	osg::Vec4Array* colors = new osg::Vec4Array;
+	colors->push_back(osg::Vec4(1.0, 0.0, 0.0, 1.0f));
+	baseGeometry->setColorArray(colors);
+	baseGeometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+
+	root->addChild(baseGeode);
+	return root;
+}
+
 osg::Group* OsgHelper::drawSquare(const eva::Squared rect, e_double64 z)
 {
 	osg::Group* root = new osg::Group();
@@ -140,4 +180,34 @@ osg::Group* OsgHelper::drawQuadtree(std::vector<QuadAppearance> &quadtree)
 osg::Vec3 OsgHelper::eva2DPointToOsgVec(const eva::Point2Dd& pt, e_double64 z)
 {
 	return osg::Vec3(pt.x(),pt.y(),z);
+}
+
+osg::Vec3 OsgHelper::eva3DPointToOsgVec(const eva::Point3Dd& pt)
+{
+	return osg::Vec3(pt.x(),pt.y(),pt.z());
+}
+
+void OsgHelper::IntelligentAgentRender::redraw()
+{
+	const std::vector<IntelligentAgent>& agents = mManager.getAgents();
+	for(e_uint32 i = 0; i < mPATs.size(); ++i)
+		mPATs[i]->setPosition(OsgHelper::eva2DPointToOsgVec(agents[i].getPosition(),2.0));
+}
+
+void OsgHelper::IntelligentAgentRender::repopulate()
+{
+	if(!mRenderRoot)
+		mRenderRoot = new osg::Group();
+	if(!mAgentGroup)
+		mAgentGroup = OsgHelper::drawFilledSquare(eva::Squared(eva::Point2Dd(),2.0), 0.0,eva::Point3Dd(1.0,1.0,1.0));
+
+	const std::vector<IntelligentAgent>& agents = mManager.getAgents();
+	for(e_uint32 i = mPATs.size(); i < agents.size(); ++i)
+	{
+		osg::PositionAttitudeTransform* agentPAT = new osg::PositionAttitudeTransform();
+		agentPAT->setPosition(OsgHelper::eva2DPointToOsgVec(agents[i].getPosition(),2.0));
+		agentPAT->addChild(mAgentGroup);
+		mRenderRoot->addChild(agentPAT);
+		mPATs.push_back(agentPAT);
+	}
 }

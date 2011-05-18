@@ -18,6 +18,7 @@ SET(GEOMETRY_HEADERS
 
 SET(ROUTE_SOURCE	route/evaRouteGraphEdge.cpp
 					route/evaRouteNode.cpp
+					route/evaTemporaryRouteNode.cpp
 					route/evaRouteGraph.cpp
 	)
 

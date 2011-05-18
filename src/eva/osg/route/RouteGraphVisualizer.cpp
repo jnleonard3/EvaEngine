@@ -55,8 +55,8 @@ namespace eva
 				osg::Geometry* lineGeometry = new osg::Geometry();
 				lineGeode->addDrawable(lineGeometry);
 				osg::Vec3Array* lineVertices = new osg::Vec3Array;
-				lineVertices->push_back(osg::Vec3(from.x(),from.y(),from.z())); // front left
-				lineVertices->push_back(osg::Vec3(to.x(),to.y(),to.z())); // front right
+				lineVertices->push_back(osg::Vec3(from.x(),from.y(),from.z()+0.1)); // front left
+				lineVertices->push_back(osg::Vec3(to.x(),to.y(),to.z()+0.1)); // front right
 				lineGeometry->setVertexArray(lineVertices);
 			    lineGeometry->addPrimitiveSet(OSG_LINE);
 			    lineGeometry->setColorArray(OSG_RED_LINE_COLORS);
@@ -124,40 +124,44 @@ namespace eva
 		return root;
 	}
 
-	osg::Group* RouteGraphVisualizer::drawRoutePath(const std::list<RoutePathElement> &path, e_double64 zoffset)
+	osg::Group* RouteGraphVisualizer::drawRoutePath(const PathNode *path, e_double64 zoffset)
 	{
 		initialize();
 		osg::Group* root = new osg::Group();
 
-		for(std::list<RoutePathElement>::const_iterator i = path.begin(); i != path.end(); ++i)
+		const PathNode *currentNode = path;
+		while(currentNode != 0)
 		{
-			if(i->mNode)
-			{
-				Point3Dd pt = i->mNode->getPoint();
-				osg::PositionAttitudeTransform* CubeXForm = new osg::PositionAttitudeTransform();
-				CubeXForm->setPosition(osg::Vec3(pt.x(),pt.y(),pt.z()+zoffset));
-				CubeXForm->addChild(UNIT_CUBE_GEODE);
-				root->addChild(CubeXForm);
-			}
+			Point3Dd pt = currentNode->mPoint;
+			osg::PositionAttitudeTransform* CubeXForm = new osg::PositionAttitudeTransform();
+			CubeXForm->setPosition(osg::Vec3(pt.x(),pt.y(),pt.z()+zoffset));
+			CubeXForm->addChild(UNIT_CUBE_GEODE);
+			root->addChild(CubeXForm);
 
-			if(i->mTravelEdge && i->mTravelEdge->getType() != ROUTEEDGE_INVALID && i->mTravelEdge->getNodeTo() && i->mTravelEdge->getNodeFrom())
+			const PathNode *nextNode = 0;
+			PathEdge *currentEdge = currentNode->mNext;
+			if(currentEdge)
 			{
-				Point3Dd from = i->mTravelEdge->getNodeFrom()->getPoint(), to = i->mTravelEdge->getNodeTo()->getPoint();
-				osg::Geode* lineGeode = new osg::Geode();
-				osg::Geometry* lineGeometry = new osg::Geometry();
-				lineGeode->addDrawable(lineGeometry);
-				osg::Vec3Array* lineVertices = new osg::Vec3Array;
-				lineVertices->push_back(osg::Vec3(from.x(),from.y(),from.z()+zoffset)); // front left
-				lineVertices->push_back(osg::Vec3(to.x(),to.y(),to.z()+zoffset)); // front right
-				lineGeometry->setVertexArray(lineVertices);
-			    lineGeometry->addPrimitiveSet(OSG_LINE);
-			    lineGeometry->setColorArray(OSG_BLUE_LINE_COLORS);
-			    lineGeometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
-			    lineGeode->addDrawable(lineGeometry);
-			    root->addChild(lineGeode);
+				nextNode = currentEdge->mNext;
+				if(nextNode)
+				{
+					Point3Dd to = nextNode->mPoint;
+					osg::Geode* lineGeode = new osg::Geode();
+					osg::Geometry* lineGeometry = new osg::Geometry();
+					lineGeode->addDrawable(lineGeometry);
+					osg::Vec3Array* lineVertices = new osg::Vec3Array;
+					lineVertices->push_back(osg::Vec3(pt.x(),pt.y(),pt.z()+zoffset)); // front left
+					lineVertices->push_back(osg::Vec3(to.x(),to.y(),to.z()+zoffset)); // front right
+					lineGeometry->setVertexArray(lineVertices);
+					lineGeometry->addPrimitiveSet(OSG_LINE);
+					lineGeometry->setColorArray(OSG_BLUE_LINE_COLORS);
+					lineGeometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+					lineGeode->addDrawable(lineGeometry);
+					root->addChild(lineGeode);
+				}
 			}
+			currentNode = nextNode;
 		}
-
 		return root;
 	}
 

@@ -75,9 +75,15 @@ class IntelligentAgentManager
 		:DEFAULT_AGENT(*this),mAgentVector(0,DEFAULT_AGENT),mQuadtree(effectiveArea,15),mRouteGraph(graph){};
 		virtual ~IntelligentAgentManager(){};
 
+		void addNewAgent(e_double64 x, e_double64 y, e_float32 orientation);
+
+		void everybodyAct();
+
 		void updatePositions(e_float32 secondsElapsed);
 
 		bool losQuery(eva::Line2Dd line, eva::Point2Dd &hit) const;
+
+		const std::vector<IntelligentAgent>& getAgents() const { return mAgentVector; };
 
 	private:
 		const IntelligentAgent DEFAULT_AGENT;

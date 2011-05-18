@@ -224,6 +224,17 @@ namespace eva
 			return visitor;
 		}
 
+		template <typename Acceptor, typename Visitor>
+		Visitor Query(const Acceptor &accept, Visitor visitor) const
+		{
+			if (m_root)
+			{
+				ConstQueryFunctor<Acceptor, Visitor> query(accept, visitor);
+				query(m_root);
+			}
+
+			return visitor;
+		}
 		
 		/**
 			\brief Removes item(s) from the tree.
@@ -615,8 +626,24 @@ namespace eva
 					visit(leaf);
 			}
 		};
-		
-		
+
+		template <typename Acceptor, typename Visitor>
+		struct ConstVisitFunctor : std::unary_function< const BoundingBox *, void > {
+
+			const Acceptor &accept;
+			Visitor &visit;
+
+			explicit ConstVisitFunctor(const Acceptor &a, Visitor &v) : accept(a), visit(v) {}
+
+			void operator()( BoundedItem * item )
+			{
+				Leaf const * const leaf = static_cast<Leaf const * const>(item);
+
+				if (accept(leaf))
+					visit(leaf);
+			}
+		};
+
 		// this functor recursively walks the tree
 		template <typename Acceptor, typename Visitor>
 		struct QueryFunctor : std::unary_function< const BoundedItem, void > {
@@ -639,6 +666,27 @@ namespace eva
 			}
 		};
 		
+		template <typename Acceptor, typename Visitor>
+		struct ConstQueryFunctor : std::unary_function< const BoundedItem, void > {
+			const Acceptor &accept;
+			Visitor &visitor;
+
+			explicit ConstQueryFunctor(const Acceptor &a, Visitor &v) : accept(a), visitor(v) {}
+
+			void operator()(BoundedItem const * const item) const
+			{
+				Node const * const node = static_cast<Node const * const>(item);
+
+				if (visitor.ContinueVisiting && accept(node))
+				{
+					if (node->hasLeaves)
+						for_each(node->items.begin(), node->items.end(), ConstVisitFunctor<Acceptor, Visitor>(accept, visitor));
+					else
+						for_each(node->items.begin(), node->items.end(), *this);
+				}
+			}
+		};
+
 		
 		/****************************************************************
 		 * Used to remove items from the tree

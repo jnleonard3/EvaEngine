@@ -30,6 +30,8 @@
 #include "eva/math/evaMatrix.h"
 #include "math.h"
 
+#include <iostream>
+
 namespace eva
 {
 	template <class T, e_uchar8 N>
@@ -71,7 +73,7 @@ namespace eva
 				return *this;
 			}
 
-			AbstractVector<T,N>& operator*=(e_int32 scale)
+			AbstractVector<T,N>& operator*=(e_double64 scale)
 			{
 				for(e_uchar8 i = 0; i < N; ++i)
 					(*this)[i] *= scale;
@@ -139,7 +141,7 @@ namespace eva
 				return result;
 			}
 
-			const AbstractVector<T,N> operator*(e_int32 scale) const
+			const AbstractVector<T,N> operator*(T scale) const
 			{
 				AbstractVector<T,N> result = *this;
 				result *= scale;

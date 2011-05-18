@@ -124,8 +124,23 @@ namespace eva
 				return mult;
 			}
 
-		private:
+			Matrix<T>& operator=(const Matrix<T>& rhs)
+			{
+				for(e_uint32 i = 0; i < this->getNumRows(); ++i)
+					for(e_uint32 j = 0; j < this->getNumCols(); ++j)
+							this->at(i,j) = rhs.at(i,j);
+				return *this;
+			}
 
+			Matrix<T>& operator+=(const Matrix<T>& rhs)
+			{
+				for(e_uint32 i = 0; i < this->getNumRows(); ++i)
+					for(e_uint32 j = 0; j < this->getNumCols(); ++j)
+						this->at(i,j) += rhs.at(i,j);
+				return *this;
+			}
+
+		private:
 			T* mMatrix;
 			const e_uint32 mRows, mCols;
 	};

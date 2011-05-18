@@ -4,8 +4,6 @@
 #include "eva/Typedefs.h"
 #include <osg/Array>
 
-#include <list>
-
 namespace osg
 {
 	class Group;
@@ -19,7 +17,7 @@ namespace eva
 {
 	class RouteNode;
 	class RouteGraph;
-	class RoutePathElement;
+	class PathNode;
 
 	class RouteGraphVisualizer
 	{
@@ -30,7 +28,7 @@ namespace eva
 
 			static osg::Group* drawRouteNode(const RouteNode &node, e_double64 zoffset);
 
-			static osg::Group* drawRoutePath(const std::list<RoutePathElement> &path, e_double64 zoffset);
+			static osg::Group* drawRoutePath(const PathNode *path, e_double64 zoffset);
 
 		private:
 			RouteGraphVisualizer(){};

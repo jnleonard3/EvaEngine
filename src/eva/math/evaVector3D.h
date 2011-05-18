@@ -2,23 +2,31 @@
 #define EVA_VECTOR3D_H_
 
 #include "eva/Typedefs.h"
-#include "eva/geometry/basic/3d/evaPoint3D.h"
+#include "eva/math/evaAbstractVector.h"
 #include "math.h"
 
 namespace eva
 {
 	template <class T>
-	class Vector3D
+	class Vector3D : public AbstractVector<T,3>
 	{
 		public:
-			Vector3D():mI(0),mJ(0),mK(0){};
-			Vector3D(T i, T j, T k):mI(i),mJ(j),mK(k){};
-			Vector3D(Point3D<T> &p1, Point3D<T> &p2):mI(p2.x()-p1.x()),mJ(p2.y()-p1.y()),mK(p2.z()-p1.z()){};
+			Vector3D()
+			:AbstractVector<T,3>(){};
+			Vector3D(T i, T j, T k)
+			:AbstractVector<T,3>(){this->i() = i; this->j() = j; this->k() = k;};
+			Vector3D(const FixedArray<T,3> &a1, const FixedArray<T,3> &a2)
+			:AbstractVector<T,3>(){this->i() = a2[0] - a1[0]; this->j() = a2[1] - a1[1]; this->k() = a2[2] - a1[2];};
+			Vector3D(const FixedArray<T,3> &array)
+			:AbstractVector<T,3>(array){};
 
-			const T& i() const { return mI; };
-			const T& j() const { return mJ; };
-			const T& k() const { return mK; };
-
+			T& i() { return (*this)[0]; };
+			const T& i() const { return (*this)[0]; };
+			T& j() { return (*this)[1]; };
+			const T& j() const { return (*this)[1]; };
+			T& k() { return (*this)[2]; };
+			const T& k() const { return (*this)[2]; };
+/*
 			void scale(e_float32 factor)
 			{
 				mI *= factor;
@@ -59,6 +67,7 @@ namespace eva
 
 		private:
 			T mI, mJ, mK;
+*/
 	};
 
 	typedef Vector3D<e_uchar8> Vector3Duc;
