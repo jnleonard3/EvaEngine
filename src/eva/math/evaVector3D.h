@@ -2,23 +2,23 @@
 #define EVA_VECTOR3D_H_
 
 #include "eva/Typedefs.h"
-#include "eva/math/evaAbstractVector.h"
+#include "eva/math/evaGenericVector.h"
 #include "math.h"
 
 namespace eva
 {
 	template <class T>
-	class Vector3D : public AbstractVector<T,3>
+	class Vector3D : public GenericVector<T,3>
 	{
 		public:
 			Vector3D()
-			:AbstractVector<T,3>(){};
+			:GenericVector<T,3>(){};
 			Vector3D(T i, T j, T k)
-			:AbstractVector<T,3>(){this->i() = i; this->j() = j; this->k() = k;};
+			:GenericVector<T,3>(){this->i() = i; this->j() = j; this->k() = k;};
 			Vector3D(const FixedArray<T,3> &a1, const FixedArray<T,3> &a2)
-			:AbstractVector<T,3>(){this->i() = a2[0] - a1[0]; this->j() = a2[1] - a1[1]; this->k() = a2[2] - a1[2];};
+			:GenericVector<T,3>(){this->i() = a2[0] - a1[0]; this->j() = a2[1] - a1[1]; this->k() = a2[2] - a1[2];};
 			Vector3D(const FixedArray<T,3> &array)
-			:AbstractVector<T,3>(array){};
+			:GenericVector<T,3>(array){};
 
 			T& i() { return (*this)[0]; };
 			const T& i() const { return (*this)[0]; };

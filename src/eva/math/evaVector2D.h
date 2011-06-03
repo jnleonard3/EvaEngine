@@ -27,26 +27,26 @@
 
 #include "eva/Typedefs.h"
 #include "eva/math/evaMathDefines.h"
-#include "eva/math/evaAbstractVector.h"
+#include "eva/math/evaGenericVector.h"
 
 #include "math.h"
 
 namespace eva
 {
 	template <class T>
-	class Vector2D : public AbstractVector<T,2>
+	class Vector2D : public GenericVector<T,2>
 	{
 		public:
 			Vector2D()
-			:AbstractVector<T,2>(){};
+			:GenericVector<T,2>(){};
 			Vector2D(T x, T y)
-			:AbstractVector<T,2>(){this->i() = x; this->j() = y;};
+			:GenericVector<T,2>(){this->i() = x; this->j() = y;};
 			Vector2D(T xF, T yF, T xT, T yT)
-			:AbstractVector<T,2>(){this->i() = xT - xF; this->j() = yT - yF;};
+			:GenericVector<T,2>(){this->i() = xT - xF; this->j() = yT - yF;};
 			Vector2D(const FixedArray<T,2> &array)
-			:AbstractVector<T,2>(array){};
+			:GenericVector<T,2>(array){};
 			Vector2D(const FixedArray<T,2> &from,const FixedArray<T,2> &to)
-			:AbstractVector<T,2>(from,to){};
+			:GenericVector<T,2>(from,to){};
 
 			T& i(){return (*this)[0];};
 			const T& i() const {return (*this)[0];};

@@ -22,8 +22,8 @@
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EVAABSTRACTVECTOR_H_
-#define EVAABSTRACTVECTOR_H_
+#ifndef EVA_GENERICVECTOR_H_
+#define EVA_GENERICVECTOR_H_
 
 #include "eva/Typedefs.h"
 #include "eva/structures/evaFixedArray.h"
@@ -33,13 +33,13 @@
 namespace eva
 {
 	template <class T, e_uchar8 N>
-	class AbstractVector : public FixedArray<T,N>
+	class GenericVector : public FixedArray<T,N>
 	{
 		public:
-			AbstractVector():FixedArray<T,N>(){};
-			AbstractVector(const FixedArray<T,N>& array)
+			GenericVector():FixedArray<T,N>(){};
+			GenericVector(const FixedArray<T,N>& array)
 			:FixedArray<T,N>(array){};
-			AbstractVector(const FixedArray<T,N>& from, const FixedArray<T,N>& to)
+			GenericVector(const FixedArray<T,N>& from, const FixedArray<T,N>& to)
 			{
 				for(e_uchar8 i = 0; i < N; ++i)
 					(*this)[i] = to[i] - from[i];
@@ -67,21 +67,21 @@ namespace eva
 				}
 			}
 
-			AbstractVector<T,N>& operator+=(const FixedArray<T,N>& rhs)
+			GenericVector<T,N>& operator+=(const FixedArray<T,N>& rhs)
 			{
 				for(e_uchar8 i = 0; i < N; ++i)
 					(*this)[i] += rhs[i];
 				return *this;
 			}
 
-			AbstractVector<T,N>& operator-=(const FixedArray<T,N>& rhs)
+			GenericVector<T,N>& operator-=(const FixedArray<T,N>& rhs)
 			{
 				for(e_uchar8 i = 0; i < N; ++i)
 					(*this)[i] -= rhs[i];
 				return *this;
 			}
 
-			AbstractVector<T,N>& operator*=(e_double64 scale)
+			GenericVector<T,N>& operator*=(e_double64 scale)
 			{
 				for(e_uchar8 i = 0; i < N; ++i)
 					(*this)[i] *= scale;
@@ -105,7 +105,7 @@ namespace eva
 				return val;
 			}
 
-			T dotProduct(const AbstractVector<T,N>& rhs) const
+			T dotProduct(const GenericVector<T,N>& rhs) const
 			{
 				T val = 0;
 				for(e_uchar8 i = 0; i < N; ++i)
@@ -113,18 +113,18 @@ namespace eva
 				return val;
 			}
 
-			const AbstractVector<T,N> crossProduct(const AbstractVector<T,N>& rhs) const
+			const GenericVector<T,N> crossProduct(const GenericVector<T,N>& rhs) const
 			{
 				if(N != 3)
-					return AbstractVector<T,N>();
-				AbstractVector<T,N> cross;
+					return GenericVector<T,N>();
+				GenericVector<T,N> cross;
 				cross[0] = ((*this)[1]*rhs[2])-(rhs[1]*(*this)[2]);
 				cross[1] = ((*this)[0]*rhs[2])-(rhs[0]*(*this)[2]);
 				cross[2] = ((*this)[0]*rhs[1])-(rhs[0]*(*this)[1]);
 				return cross;
 			}
 
-			T angleBetween(const AbstractVector<T,N>& rhs) const
+			T angleBetween(const GenericVector<T,N>& rhs) const
 			{
 				T magnitude = this->magnitude()*rhs.magnitude();
 				if(magnitude != 0)
@@ -138,23 +138,23 @@ namespace eva
 				return Matrix<T>(N,1,&(*this)[0]);
 			}
 
-			const AbstractVector<T,N> operator+(const FixedArray<T,N>& rhs) const
+			const GenericVector<T,N> operator+(const FixedArray<T,N>& rhs) const
 			{
-				AbstractVector<T,N> result = *this;
+				GenericVector<T,N> result = *this;
 				result += rhs;
 				return result;
 			}
 
-			const AbstractVector<T,N> operator-(const FixedArray<T,N>& rhs) const
+			const GenericVector<T,N> operator-(const FixedArray<T,N>& rhs) const
 			{
-				AbstractVector<T,N> result = *this;
+				GenericVector<T,N> result = *this;
 				result -= rhs;
 				return result;
 			}
 
-			const AbstractVector<T,N> operator*(T scale) const
+			const GenericVector<T,N> operator*(T scale) const
 			{
-				AbstractVector<T,N> result = *this;
+				GenericVector<T,N> result = *this;
 				result *= scale;
 				return result;
 			}

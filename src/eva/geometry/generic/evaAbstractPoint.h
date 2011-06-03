@@ -28,7 +28,7 @@
 #include "eva/Typedefs.h"
 #include "eva/structures/evaFixedArray.h"
 #include "eva/math/evaMatrix.h"
-#include "eva/math/evaAbstractVector.h"
+#include "eva/math/evaGenericVector.h"
 
 #include <iostream>
 #include "math.h"
@@ -80,9 +80,9 @@ namespace eva
 				return val;
 			}
 
-			const AbstractPoint<T,N> projectOnto(const AbstractPoint<T,N> &vecPt, const AbstractVector<T,N> &vec) const
+			const AbstractPoint<T,N> projectOnto(const AbstractPoint<T,N> &vecPt, const GenericVector<T,N> &vec) const
 			{
-				AbstractVector<T,N> vecPtVec(vecPt), thisPtVec(*this), vecNorm = vec;
+				GenericVector<T,N> vecPtVec(vecPt), thisPtVec(*this), vecNorm = vec;
 				vecNorm.normalize();
 				thisPtVec -= vecPtVec;
 				T scale = thisPtVec.dotProduct(vec)/vec.magnitude();
@@ -101,14 +101,14 @@ namespace eva
 				return pt;
 			}
 
-			const AbstractVector<T,N> toVector() const
+			const GenericVector<T,N> toVector() const
 			{
-				return AbstractVector<T,N>(*this);
+				return GenericVector<T,N>(*this);
 			}
 
-			const AbstractVector<T,N> toVector(const AbstractPoint<T,N>& to) const
+			const GenericVector<T,N> toVector(const AbstractPoint<T,N>& to) const
 			{
-				AbstractVector<T,N> result = to.toVector() - this->toVector();
+				GenericVector<T,N> result = to.toVector() - this->toVector();
 				return result;
 			}
 
