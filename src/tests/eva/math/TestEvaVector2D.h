@@ -27,7 +27,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "eva/math/evaVector2D.h"
+#include "eva/math/evaVector.h"
 
 class TestEvaVector2D : public CPPUNIT_NS::TestFixture
 {

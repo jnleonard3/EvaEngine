@@ -28,7 +28,7 @@
 #include "eva/Typedefs.h"
 #include "eva/structures/evaFixedArray.h"
 #include "eva/math/evaMatrix.h"
-#include "eva/math/evaGenericVector.h"
+#include "eva/math/evaVector.h"
 
 #include <iostream>
 #include "math.h"

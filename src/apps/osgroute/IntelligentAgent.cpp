@@ -26,7 +26,7 @@
 #include "IntelligentAgentManager.h"
 
 #include "eva/math/evaMathDefines.h"
-#include "eva/math/evaVector2D.h"
+#include "eva/math/evaVector.h"
 
 #include "math.h"
 

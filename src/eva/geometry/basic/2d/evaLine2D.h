@@ -27,7 +27,7 @@
 
 #include "eva/Typedefs.h"
 #include "eva/geometry/basic/2d/evaPoint2D.h"
-#include "eva/math/evaVector2D.h"
+#include "eva/math/evaVector.h"
 #include "eva/math/evaMathCommon.h"
 #include "math.h"
 

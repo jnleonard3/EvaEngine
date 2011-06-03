@@ -28,6 +28,8 @@
 #include "eva/Typedefs.h"
 #include "eva/structures/evaFixedArray.h"
 #include "eva/math/evaMatrix.h"
+#include "eva/math/evaMathDefines.h"
+
 #include "math.h"
 
 namespace eva
@@ -159,6 +161,75 @@ namespace eva
 				return result;
 			}
 	};
+
+	template <class T>
+	class Vector2D : public GenericVector<T,2>
+	{
+		public:
+			Vector2D()
+			:GenericVector<T,2>(){};
+			Vector2D(T x, T y)
+			:GenericVector<T,2>(){this->i() = x; this->j() = y;};
+			Vector2D(T xF, T yF, T xT, T yT)
+			:GenericVector<T,2>(){this->i() = xT - xF; this->j() = yT - yF;};
+			Vector2D(const FixedArray<T,2> &array)
+			:GenericVector<T,2>(array){};
+			Vector2D(const FixedArray<T,2> &from,const FixedArray<T,2> &to)
+			:GenericVector<T,2>(from,to){};
+
+			T& i(){return (*this)[0];};
+			const T& i() const {return (*this)[0];};
+
+			T& j(){return (*this)[1];};
+			const T& j() const {return (*this)[1];};
+
+			T angle() const
+			{
+				return atan2(this->j(), this->i());
+			}
+
+			// Keep in mind that all rotations go in the counter-clockwise direction
+			Vector2D<T> rotate(e_float32 radians) const
+			{
+				return Vector2D<T>(this->i()*cos(radians)-this->j()*sin(radians),this->i()*sin(radians)+this->j()*cos(radians));
+			}
+	};
+
+	typedef Vector2D<e_float32> Vector2Df;
+	typedef Vector2D<e_double64> Vector2Dd;
+
+	template <class T>
+	class Vector3D : public GenericVector<T,3>
+	{
+		public:
+			Vector3D()
+			:GenericVector<T,3>(){};
+			Vector3D(T i, T j, T k)
+			:GenericVector<T,3>(){this->i() = i; this->j() = j; this->k() = k;};
+			Vector3D(const FixedArray<T,3> &a1, const FixedArray<T,3> &a2)
+			:GenericVector<T,3>(){this->i() = a2[0] - a1[0]; this->j() = a2[1] - a1[1]; this->k() = a2[2] - a1[2];};
+			Vector3D(const FixedArray<T,3> &array)
+			:GenericVector<T,3>(array){};
+
+			T& i() { return (*this)[0]; };
+			const T& i() const { return (*this)[0]; };
+			T& j() { return (*this)[1]; };
+			const T& j() const { return (*this)[1]; };
+			T& k() { return (*this)[2]; };
+			const T& k() const { return (*this)[2]; };
+
+			const Vector3D crossProduct(const Vector3D& rhs) const
+			{
+				Vector3D cross;
+				cross.i() = (this->j()*rhs.k())-(rhs.j()*this->k());
+				cross.j() = ((*this)[0]*rhs[2])-(rhs[0]*(*this)[2]);
+				cross.k() = ((*this)[0]*rhs[1])-(rhs[0]*(*this)[1]);
+				return cross;
+			}
+	};
+
+	typedef Vector3D<e_float32> Vector3Df;
+	typedef Vector3D<e_double64> Vector3Dd;
 };
 
 #endif

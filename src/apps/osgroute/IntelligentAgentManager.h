@@ -31,7 +31,7 @@
 
 #include "eva/geometry/basic/2d/evaPoint2D.h"
 #include "eva/geometry/basic/2d/evaSquare.h"
-#include "eva/math/evaVector3D.h"
+#include "eva/math/evaVector.h"
 
 #include <list>
 

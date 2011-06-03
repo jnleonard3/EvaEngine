@@ -31,7 +31,7 @@
 #include "eva/osg/route/RouteGraphVisualizer.h"
 #include "eva/route/evaRouteNode.h"
 #include "eva/route/evaRouteGraph.h"
-#include "eva/math/evaVector3D.h"
+#include "eva/math/evaVector.h"
 #include "eva/math/evaMathCommon.h"
 #include "eva/geometry/basic/3d/evaLine3D.h"
 #include "eva/geometry/basic/2d/evaPoint2D.h"

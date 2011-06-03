@@ -2,7 +2,7 @@
 #define EVA_ROUTEGRAPHEDGE_H_
 
 #include "eva/Typedefs.h"
-#include "eva/math/evaVector3D.h"
+#include "eva/math/evaVector.h"
 #include "eva/geometry/basic/3d/evaLine3D.h"
 #include "eva/geometry/basic/3d/evaCuboid.h"
 

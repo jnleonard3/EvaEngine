@@ -25,7 +25,7 @@
 #ifndef EVA_INTERSECTION2D_H_
 #define EVA_INTERSECTION2D_H_
 
-#include "eva/math/evaVector2D.h"
+#include "eva/math/evaVector.h"
 #include "eva/math/evaMathCommon.h"
 #include "eva/geometry/basic/2d/evaPoint2D.h"
 #include "eva/geometry/basic/2d/evaLine2D.h"
