@@ -54,17 +54,17 @@ class IntelligentAgent
 
 		IntelligentAgent(IntelligentAgentManager &manager)
 		:mManager(manager),mState(STATE_WAITING),mBounds(eva::Point2Dd(),eva::Vector2Dd(2.0,5.0)),
-		 mVelocityMagnitude(0.0f),mAccelerationMagnitude(0.0f),mSteeringWheelOffset(0.0f){};
+		 mVelocityMagnitude(0.0f),mAccelerationMagnitude(0.0f),mSteeringWheelOffset(0.0f),mCurrentDirections(0){};
 		IntelligentAgent(IntelligentAgentManager &manager, eva::Point2Dd position, e_float32 orientation)
 		:mManager(manager),mState(STATE_WAITING),mBounds(position,eva::Vector2Dd(2.0,5.0)),
-		 mVelocityMagnitude(0.0f),mAccelerationMagnitude(0.0f),mSteeringWheelOffset(0.0f){mBounds.rotate(orientation);};
+		 mVelocityMagnitude(0.0f),mAccelerationMagnitude(0.0f),mSteeringWheelOffset(0.0f),mCurrentDirections(0){mBounds.rotate(orientation);};
 		IntelligentAgent(const IntelligentAgent& agent)
 		:mManager(agent.mManager),mState(STATE_WAITING),mBounds(agent.mBounds),
-		mVelocityMagnitude(0.0f),mAccelerationMagnitude(0.0f),mSteeringWheelOffset(0.0f){};
+		mVelocityMagnitude(0.0f),mAccelerationMagnitude(0.0f),mSteeringWheelOffset(0.0f),mCurrentDirections(0){};
 
 		void act();
 
-		void giveDirections(const eva::PathNode *node);
+		void giveDirections(eva::PathNode *node);
 
 		void updatePosition(e_float32 secondsElapsed);
 
@@ -85,7 +85,7 @@ class IntelligentAgent
 		e_uchar8 mState;
 		eva::Rectangled mBounds;
 		e_float32 mVelocityMagnitude, mAccelerationMagnitude, mSteeringWheelOffset;
-		const eva::PathNode *mCurrentDirections;
+		eva::PathNode *mCurrentDirections;
 
 		const IntelligentAgentManager& getManager() const { return mManager; };
 

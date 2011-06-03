@@ -24,9 +24,10 @@
 
 #include "IntelligentAgentManager.h"
 
-void IntelligentAgentManager::addNewAgent(e_double64 x, e_double64 y, e_float32 orientation)
+IntelligentAgent& IntelligentAgentManager::addNewAgent(e_double64 x, e_double64 y, e_float32 orientation)
 {
 	mAgentVector.push_back(IntelligentAgent(*this, eva::Point2Dd(x,y), orientation));
+	return mAgentVector.back();
 }
 
 void IntelligentAgentManager::everybodyAct()

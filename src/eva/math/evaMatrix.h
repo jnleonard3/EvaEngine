@@ -41,17 +41,17 @@ namespace eva
 			{
 				mMatrix = new T[mRows*mCols];
 			};
-			Matrix(e_uint32 rows, e_uint32 cols, T* elements)
+			Matrix(e_uint32 rows, e_uint32 cols, const T* elements)
 			:mMatrix(0),mRows(rows),mCols(cols)
 			{
 				mMatrix = new T[mRows*mCols];
-				memcpy(mMatrix,elements,mRows*mCols);
+				memcpy(mMatrix,elements,sizeof(T)*mRows*mCols);
 			};
 			Matrix(const Matrix& mat)
 			:mMatrix(0),mRows(mat.getNumRows()),mCols(mat.getNumCols())
 			{
 				mMatrix = new T[mRows*mCols];
-				memcpy(mMatrix,&mat.at(0),mRows*mCols);
+				memcpy(mMatrix,&mat.at(0),sizeof(T)*mRows*mCols);
 			}
 
 			virtual ~Matrix(){delete mMatrix;};

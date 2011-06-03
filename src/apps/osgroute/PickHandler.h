@@ -20,11 +20,13 @@ namespace eva
 	class RouteGraph;
 }
 
+class IntelligentAgent;
+
 class PickHandler : public osgGA::GUIEventHandler
 {
 	public:
-		PickHandler(osg::Group *root, eva::RouteGraph &graph, osg::Group *routeNodesGraph)
-		:mGraph(graph),mRoot(root),mClicked(0),mRouteNodesGraph(routeNodesGraph),isActive(false),mFirstPoint(),mSecondPoint(){};
+		PickHandler(osg::Group *root, eva::RouteGraph &graph, osg::Group *routeNodesGraph, IntelligentAgent& agent)
+		:mGraph(graph),mRoot(root),mClicked(0),mRouteNodesGraph(routeNodesGraph),isActive(false),mFirstPoint(),mSecondPoint(),mAgent(agent){};
 		virtual ~PickHandler(){};
 
 		bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
@@ -34,6 +36,7 @@ class PickHandler : public osgGA::GUIEventHandler
 		osg::Group *mRoot,*mClicked, *mRouteNodesGraph;
 		bool isActive;
 		eva::Point3Dd mFirstPoint, mSecondPoint;
+		IntelligentAgent& mAgent;
 };
 
 #endif

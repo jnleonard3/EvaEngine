@@ -26,48 +26,15 @@ namespace eva
 			const T& j() const { return (*this)[1]; };
 			T& k() { return (*this)[2]; };
 			const T& k() const { return (*this)[2]; };
-/*
-			void scale(e_float32 factor)
-			{
-				mI *= factor;
-				mJ *= factor;
-				mK *= factor;
-			}
 
-			void normalize()
+			const Vector3D crossProduct(const Vector3D& rhs) const
 			{
-				T length = sqrt(pow(mI,2) + pow(mJ,2) + pow(mK,2));
-				mI /= length;
-				mJ /= length;
-				mK /= length;
+				Vector3D cross;
+				cross.i() = (this->j()*rhs.k())-(rhs.j()*this->k());
+				cross.j() = ((*this)[0]*rhs[2])-(rhs[0]*(*this)[2]);
+				cross.k() = ((*this)[0]*rhs[1])-(rhs[0]*(*this)[1]);
+				return cross;
 			}
-
-			Vector3D crossProduct(const Vector3D &rhs) const
-			{
-				return Vector3D((this->j()*rhs.k())-(rhs.j()*this->k()),(this->i()*rhs.k())-(rhs.i()*this->k()),(this->i()*rhs.j())-(rhs.i()*this->j()));
-			}
-
-			bool isZeroVector() const
-			{
-				return mI == 0 && mJ == 0 && mK == 0;
-			}
-
-			Vector3D<T>& operator+=(const Vector3D<T> &rhs)
-			{
-			    mI += rhs.i();
-			    mJ += rhs.j();
-			    mK += rhs.k();
-			    return *this;
-			}
-
-			const Vector3D<T> operator+(const Vector3D<T> &rhs) const
-			{
-			    return Vector3D<T>(*this) += rhs;
-			}
-
-		private:
-			T mI, mJ, mK;
-*/
 	};
 
 	typedef Vector3D<e_uchar8> Vector3Duc;

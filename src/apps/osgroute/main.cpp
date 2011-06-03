@@ -218,7 +218,7 @@ int main(int argc, char** argv)
 	quadtree.lineOfSightQuery< BasicQuadtreeLineIntersectVisitor<int> >(eva::Line2Dd(50.0,50.0,550.0,550),visitor);
 
 	IntelligentAgentManager intelligentManager(graph, eva::Squared(base.constRef().getCenter(),(max+(extra*2.0)+extra)/2.0));
-	intelligentManager.addNewAgent(10.0,10.0,0.0);
+	IntelligentAgent& agent = intelligentManager.addNewAgent(10.0,15.0,0.0);
 
 	OsgHelper::IntelligentAgentRender imRender(intelligentManager);
 	root->addChild(imRender.mRenderRoot);
@@ -226,7 +226,7 @@ int main(int argc, char** argv)
 	root->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
 	osgViewer::Viewer viewer;
-	viewer.addEventHandler(new PickHandler(root,graph,graphRoot));
+	viewer.addEventHandler(new PickHandler(root,graph,graphRoot,agent));
 	viewer.setSceneData(root);
 	viewer.setCameraManipulator(new osgGA::TrackballManipulator);
 	viewer.realize();
@@ -240,7 +240,7 @@ int main(int argc, char** argv)
 
 		intelligentManager.everybodyAct();
 
-		usleep(1000);
+		usleep(10000);
 	}
 
 	return 0;

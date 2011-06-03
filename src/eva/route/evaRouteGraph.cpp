@@ -93,6 +93,8 @@ namespace eva
 				Point3Dd inter = edge.toLine().projectOnto(mQueryPoint);
 				if(updateNodeDistance(mQueryPoint.distance(inter)))
 				{
+					//std::cout << edge.getNodeTo()->getPoint().x() << "," << edge.getNodeTo()->getPoint().y() <<"~~\n";
+					//std::cout << inter.x() << "," << inter.y() << ":" << mMaxNodeDistance <<"~\n";
 					mClosestEdge = &edge;
 					mIntersectionPoint = inter;
 				}
@@ -290,6 +292,8 @@ namespace eva
 	{
 		Point3Dd fromNearest, toNearest;
 		RouteGraphEdge const * edgeFrom = this->findClosestEdge(ptFrom,&fromNearest), *edgeTo = this->findClosestEdge(ptTo,&toNearest);
+		std::cout << "From: " << ptFrom << ", To: " << ptTo << "\n";
+		std::cout << "EdgeFrom:" << edgeFrom->toLine() << ", EdgeTo: " << edgeTo->toLine() << "\n";
 		const RouteNode &nodeFrom = *(edgeFrom->getNodeTo()), &nodeTo = *(edgeTo->getNodeFrom());
 		std::vector<RouteNodeRecord*> closedSet, openSet;
 		openSet.push_back(new RouteNodeRecord(&nodeFrom,0,0,nodeFrom.getPoint().distance(nodeTo.getPoint()),0));
@@ -312,7 +316,7 @@ namespace eva
 
 			for(e_uchar8 i = 0; i < currentNode.getNumEdgesFrom(); ++i)
 			{
-				if(currentNode.getFromEdge(i) != 0 && currentNode.getFromEdge(i)->getType() == ROUTEEDGE_DIRECT)
+				if(currentNode.getFromEdge(i) && currentNode.getFromEdge(i)->getType() == ROUTEEDGE_DIRECT)
 				{
 					bool isInOpenSet = false, isInClosedSet = false, skip = false;
 
@@ -334,8 +338,6 @@ namespace eva
 							}
 							else
 								skip = true;
-
-							break;
 						}
 					}
 

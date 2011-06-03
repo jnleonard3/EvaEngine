@@ -30,8 +30,6 @@
 namespace eva
 {
 	static const e_float32 E_PI = 3.14f;
-
 };
-
 
 #endif

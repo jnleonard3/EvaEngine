@@ -34,7 +34,8 @@
 
 const e_double64 IntelligentAgent::LOOKAHEAD_CONSTANT = 1.5;
 const e_double64 IntelligentAgent::MAX_VELOCITY_VALUE = 15.0;
-const e_double64 IntelligentAgent::MAX_DECELERATION_VALUE = 8.0;
+const e_double64 IntelligentAgent::MAX_ACCELERATION_VALUE = 1.0;
+const e_double64 IntelligentAgent::MAX_DECELERATION_VALUE = 2.0;
 
 const eva::Vector2Dd getOrientedVector(e_float32 orient)
 {
@@ -43,14 +44,32 @@ const eva::Vector2Dd getOrientedVector(e_float32 orient)
 
 void IntelligentAgent::act()
 {
-	if(mVelocityMagnitude < 13.0)
-		mAccelerationMagnitude = 0.25;
-	else
-		mAccelerationMagnitude = 0.0;
-	/*
-	// If we are waiting, remain waiting until orders come in
-	if(mState == STATE_WAITING)
+	if(mCurrentDirections && mState == STATE_WAITING)
+		mState = STATE_STOPPED;
+	else if(mState == STATE_WAITING) // If we are waiting, remain waiting until orders come in
 		return;
+
+	if(!mCurrentDirections)
+	{
+		if(mVelocityMagnitude > 0)
+		{
+			mState = STATE_DECELERTATNG;
+			mAccelerationMagnitude = -0.75*MAX_DECELERATION_VALUE;
+		}
+		else
+			mState = STATE_WAITING;
+	}
+	else if(this->getPosition().distance(mCurrentDirections->mPoint.toPoint<2>()) < 0.5)
+	{
+		std::cout << "Node Change!\n";
+		if(mCurrentDirections->mNext == 0)
+			mCurrentDirections = 0;
+		else
+		{
+			mCurrentDirections = mCurrentDirections->mNext->mNext;
+			mBounds.orientTowards(mCurrentDirections->mPoint.toPoint<2>());
+		}
+	}
 
 	// Do a Line Of Sight Check
 	e_double64 losDistance = 10.0;
@@ -62,14 +81,30 @@ void IntelligentAgent::act()
 	eva::Line2Dd losLine(losStart,losEnd);
 	if(this->losQuery(losLine,hit))
 	{
-
+		mState = STATE_DECELERTATNG;
+		mAccelerationMagnitude = MAX_DECELERATION_VALUE;
 	}
 	else
 	{
-		//if(mState == STATE_STOPPED)
-	}
-	*/
+		if(mState == STATE_STOPPED)
+		{
+			mBounds.orientTowards(mCurrentDirections->mPoint.toPoint<2>());
+			mAccelerationMagnitude = 0.5*MAX_ACCELERATION_VALUE;
+			mState = STATE_ACCELERATING;
+		}
 
+	}
+}
+
+void IntelligentAgent::giveDirections(eva::PathNode *node)
+{
+	if(mCurrentDirections)
+	{
+		mCurrentDirections->mNext = new eva::PathEdge();
+		mCurrentDirections->mNext->mNext = node;
+	}
+	else
+		mCurrentDirections = node;
 }
 
 void IntelligentAgent::updatePosition(e_float32 secondsElapsed)
@@ -85,10 +120,11 @@ void IntelligentAgent::updatePosition(e_float32 secondsElapsed)
 
 	if(directionVector.magnitude() != 0.0)
 	{
-		e_float32 angle = start.angleBetween(directionVector);
-		if(mSteeringWheelOffset < 0)
-			angle *= -1.0;
-		mBounds.rotate(angle);
+		//directionVector.normalize();
+		//e_float32 angle = start.angleBetween(directionVector);
+		//if(mSteeringWheelOffset < 0)
+		//	angle *= -1.0;
+		//mBounds.rotate(angle);
 	}
 
 	mVelocityMagnitude += mAccelerationMagnitude*secondsElapsed;
@@ -96,16 +132,17 @@ void IntelligentAgent::updatePosition(e_float32 secondsElapsed)
 	{
 		mVelocityMagnitude = 0.0;
 		mAccelerationMagnitude = 0.0;
+		mState = STATE_STOPPED;
 	}
 	else if(mVelocityMagnitude > MAX_VELOCITY_VALUE)
 	{
 		mVelocityMagnitude = MAX_VELOCITY_VALUE;
 		mAccelerationMagnitude = 0.0;
+		mState = STATE_STEADY;
 	}
 }
 
 bool IntelligentAgent::losQuery(const eva::Line2Dd &line, eva::Point2Dd &hit) const
 {
 	return this->getManager().losQuery(line, hit);
-	return false;
 };

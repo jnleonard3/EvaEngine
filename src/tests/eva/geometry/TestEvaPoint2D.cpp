@@ -1,7 +1,5 @@
 #include "TestEvaPoint2D.h"
 
-#include "eva/geometry/evaPoint2D.h"
-
 CPPUNIT_TEST_SUITE_REGISTRATION (TestEvaPoint2D);
 
 void TestEvaPoint2D::setUp ()
@@ -23,7 +21,7 @@ void TestEvaPoint2D::tearDown()
 
 void TestEvaPoint2D::distanceTest()
 {
-	CPPUNIT_ASSERT_EQUAL(a->distanceFrom(*b), 1);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(c->distanceFrom(*d), 1.414213562, 0.000001);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(e->distanceFrom(*f), 1.414213562, 0.000001);
+	CPPUNIT_ASSERT_EQUAL(a->distance(*b), 1);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(c->distance(*d), 1.414213562, 0.000001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(e->distance(*f), 1.414213562, 0.000001);
 }

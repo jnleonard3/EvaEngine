@@ -75,7 +75,7 @@ class IntelligentAgentManager
 		:DEFAULT_AGENT(*this),mAgentVector(0,DEFAULT_AGENT),mQuadtree(effectiveArea,15),mRouteGraph(graph){};
 		virtual ~IntelligentAgentManager(){};
 
-		void addNewAgent(e_double64 x, e_double64 y, e_float32 orientation);
+		IntelligentAgent& addNewAgent(e_double64 x, e_double64 y, e_float32 orientation);
 
 		void everybodyAct();
 

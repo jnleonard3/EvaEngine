@@ -26,6 +26,7 @@
 #define EVA_VECTOR2D_H_
 
 #include "eva/Typedefs.h"
+#include "eva/math/evaMathDefines.h"
 #include "eva/math/evaAbstractVector.h"
 
 #include "math.h"
@@ -44,6 +45,8 @@ namespace eva
 			:AbstractVector<T,2>(){this->i() = xT - xF; this->j() = yT - yF;};
 			Vector2D(const FixedArray<T,2> &array)
 			:AbstractVector<T,2>(array){};
+			Vector2D(const FixedArray<T,2> &from,const FixedArray<T,2> &to)
+			:AbstractVector<T,2>(from,to){};
 
 			T& i(){return (*this)[0];};
 			const T& i() const {return (*this)[0];};
@@ -51,6 +54,12 @@ namespace eva
 			T& j(){return (*this)[1];};
 			const T& j() const {return (*this)[1];};
 
+			T angle() const
+			{
+				return atan2(this->j(), this->i());
+			}
+
+			// Keep in mind that all rotations go in the counter-clockwise direction
 			Vector2D<T> rotate(e_float32 radians) const
 			{
 				return Vector2D<T>(this->i()*cos(radians)-this->j()*sin(radians),this->i()*sin(radians)+this->j()*cos(radians));

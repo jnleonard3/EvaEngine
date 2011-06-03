@@ -30,6 +30,7 @@
 #include "eva/math/evaMatrix.h"
 #include "eva/math/evaAbstractVector.h"
 
+#include <iostream>
 #include "math.h"
 
 namespace eva
@@ -140,10 +141,28 @@ namespace eva
 				return result;
 			}
 
+			const AbstractPoint<T,N> operator*(e_double64 scale) const
+			{
+				AbstractPoint<T,N> result = *this;
+				for(e_uchar8 i = 0; i < N; ++i)
+					result[i] *= scale;
+				return result;
+			}
+
 			bool operator==(const AbstractPoint<T,N> &rhs) const
 			{
 				return this->isEqual(rhs);
 			};
+
+			friend std::ostream& operator<<(std::ostream &stream, const AbstractPoint<T,N> &a)
+			{
+				stream << "(";
+				for(e_uchar8 i = 0; i < N-1; ++i)
+					stream << a[i] << ", ";
+				stream << a[N-1];
+				stream << ")";
+				return stream;
+			}
 
 		private:
 			Matrix<T> toMatrix() const

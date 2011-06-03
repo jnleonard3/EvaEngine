@@ -31,6 +31,8 @@
 #include "eva/math/evaMathCommon.h"
 #include "eva/math/evaVector3D.h"
 
+#include <iostream>
+
 namespace eva
 {
 	template <class T>
@@ -60,6 +62,12 @@ namespace eva
 			const Vector3D<T> toVector() const
 			{
 				return Vector3D<T>(mTo.x()-mFrom.x(),mTo.y()-mFrom.y(),mTo.z()-mFrom.z());
+			}
+
+			friend std::ostream& operator<<(std::ostream &stream, const Line3D &a)
+			{
+				stream << "[" << a.from() << " -> " << a.to() << "]";
+				return stream;
 			}
 
 		private:

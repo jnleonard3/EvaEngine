@@ -30,8 +30,6 @@
 #include "eva/math/evaMatrix.h"
 #include "math.h"
 
-#include <iostream>
-
 namespace eva
 {
 	template <class T, e_uchar8 N>
@@ -41,15 +39,25 @@ namespace eva
 			AbstractVector():FixedArray<T,N>(){};
 			AbstractVector(const FixedArray<T,N>& array)
 			:FixedArray<T,N>(array){};
+			AbstractVector(const FixedArray<T,N>& from, const FixedArray<T,N>& to)
+			{
+				for(e_uchar8 i = 0; i < N; ++i)
+					(*this)[i] = to[i] - from[i];
+			};
 
 			void normalize()
 			{
 				T mag = this->magnitude();
-				for(e_uchar8 i = 0; i < N; ++i)
-					(*this)[i] /= mag;
+				if(mag != 0)
+				{
+					for(e_uchar8 i = 0; i < N; ++i)
+						(*this)[i] /= mag;
+				}
 			}
 
-			void rotate(const Matrix<T>& rotMat)
+			// Keep in mind that all rotations operate in the
+			// clockwise direction
+			void applyMatrix(const Matrix<T>& rotMat)
 			{
 				Matrix<T> mult = rotMat*this->toMatrix();
 				if(mult.getNumRows() != 0)
@@ -109,7 +117,6 @@ namespace eva
 			{
 				if(N != 3)
 					return AbstractVector<T,N>();
-
 				AbstractVector<T,N> cross;
 				cross[0] = ((*this)[1]*rhs[2])-(rhs[1]*(*this)[2]);
 				cross[1] = ((*this)[0]*rhs[2])-(rhs[0]*(*this)[2]);
@@ -119,7 +126,11 @@ namespace eva
 
 			T angleBetween(const AbstractVector<T,N>& rhs) const
 			{
-				return acos(this->dotProduct(rhs)/(this->magnitude()*rhs.magnitude()));
+				T magnitude = this->magnitude()*rhs.magnitude();
+				if(magnitude != 0)
+					return acos(this->dotProduct(rhs)/magnitude);
+				else
+					return 0;
 			}
 
 			Matrix<T> toMatrix() const

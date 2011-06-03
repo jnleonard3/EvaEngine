@@ -26,6 +26,7 @@
 #define EVA_FIXEDPOLYGON_H_
 
 #include "eva/Typedefs.h"
+#include "eva/math/evaMathDefines.h"
 #include "eva/math/evaVector2D.h"
 #include "eva/geometry/basic/2d/evaPoint2D.h"
 #include "eva/geometry/basic/2d/evaLine2D.h"
@@ -58,13 +59,26 @@ namespace eva
 				this->recalculate();
 			}
 
-			void rotate(e_float32 angle)
+			void rotate(e_double64 angle)
 			{
 				Vector2D<T>* vectors = this->getVectors();
 				for(e_uchar8 i = 0; i < this->getNumOfEdges(); ++i)
 					vectors[i].rotate(angle);
 				this->getOrientation() += angle;
 				this->recalculate();
+			}
+
+			void orientTowards(const Point2D<T>& to)
+			{
+				std::cout << this->getCenter().x() << "," << this->getCenter().y() << " -> " << to.x() << "," << to.y() << "\n";
+				Vector2D<T> vec(this->getCenter(),to), forward(cos(this->getOrientation()),sin(this->getOrientation()));
+				std::cout << this->getOrientation() << "(theta)\n";
+				std::cout << vec.angleBetween(forward) << "(theta)\n";
+				std::cout << vec.i() << "," << vec.j() << "\n";
+				std::cout << forward.i() << "," << forward.j() << "\n";
+				std::cout << vec.angle() << "|" << forward.angle() << "\n";
+				vec.normalize();
+				this->rotate(vec.angleBetween(forward));
 			}
 
 			const FixedPolygon<T,N>& constRef() const { return *this; };
