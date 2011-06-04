@@ -61,6 +61,9 @@ void TestEvaVector2D::normalizeTest()
 	normZero.normalize();
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, normZero.i(), ACCURACY);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, normZero.j(), ACCURACY);
+	eva::Vector2Df normC = c->normalized();
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, normC.i(), ACCURACY);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, normC.j(), ACCURACY);
 	c->normalize();
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, c->i(), ACCURACY);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, c->j(), ACCURACY);
@@ -80,6 +83,20 @@ void TestEvaVector2D::applyMatrixTest()
 	eva::Vector2Df rotC = c->rotate(eva::E_PI/2.0f);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, rotC.i(), ACCURACY);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, rotC.j(), ACCURACY);
+	eva::Vector2Df modB = b->matrixApplied(rotationMatrix);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, modB.i(), ACCURACY);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(7.0, modB.j(), ACCURACY);
+
+}
+
+void TestEvaVector2D::scaleTest()
+{
+	eva::Vector2Df scale = a->scaled(2.0);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(6.0, scale.i(), ACCURACY);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0, scale.j(), ACCURACY);
+	b->scale(2.0);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(-14.0, b->i(), ACCURACY);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, b->j(), ACCURACY);
 }
 
 void TestEvaVector2D::additionCompoundAssignmentTest()
@@ -96,14 +113,6 @@ void TestEvaVector2D::subtractionCompundAssignmentTest()
 	addA -= *b;
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0, addA.i(), ACCURACY);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, addA.j(), ACCURACY);
-}
-
-void TestEvaVector2D::multiplicationCompoundAssignmentTest()
-{
-	eva::Vector2Df mult = *a;
-	mult *= 2.0;
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(6.0, mult.i(), ACCURACY);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0, mult.j(), ACCURACY);
 }
 
 void TestEvaVector2D::isZeroTest()
@@ -148,13 +157,6 @@ void TestEvaVector2D::subtractionTest()
 	eva::Vector2Df sub = *a - *b;
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0, sub.i(), ACCURACY);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, sub.j(), ACCURACY);
-}
-
-void TestEvaVector2D::multiplicationTest()
-{
-	eva::Vector2Df mult = (*a) * 2.0;
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(6.0, mult.i(), ACCURACY);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0, mult.j(), ACCURACY);
 }
 
 void TestEvaVector2D::angleTest()

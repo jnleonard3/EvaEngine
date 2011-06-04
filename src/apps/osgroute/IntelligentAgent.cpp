@@ -75,7 +75,7 @@ void IntelligentAgent::act()
 	e_double64 losDistance = 10.0;
 	losDistance += mVelocityMagnitude*LOOKAHEAD_CONSTANT;
 	eva::Vector2Dd losVec = getOrientedVector(this->getOrientation());
-	losVec *= losDistance;
+	losVec.scale(losDistance);
 
 	eva::Point2Dd losStart(this->getPosition()), losEnd(losStart,losVec), hit;
 	eva::Line2Dd losLine(losStart,losEnd);
@@ -110,12 +110,12 @@ void IntelligentAgent::giveDirections(eva::PathNode *node)
 void IntelligentAgent::updatePosition(e_float32 secondsElapsed)
 {
 	eva::Vector2Dd start = getOrientedVector(this->getOrientation()), directionVector = start, turnVector = start;
-	directionVector *= mVelocityMagnitude;
+	directionVector.scale(mVelocityMagnitude);
 	turnVector.rotate(eva::E_PI/2.0f);
-	turnVector *= mSteeringWheelOffset;
+	turnVector.scale(mSteeringWheelOffset);
 	directionVector += turnVector;
 	// Units are meters/second, scale vector to actual amount of time elapsed since last update
-	directionVector *= secondsElapsed;
+	directionVector.scale(secondsElapsed);
 	mBounds.move(directionVector);
 
 	if(directionVector.magnitude() != 0.0)

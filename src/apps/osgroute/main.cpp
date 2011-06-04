@@ -109,7 +109,7 @@ osg::Group* drawRoads(std::vector<Road>& roads)
 				vec.normalize();
 				eva::Vector3Dd perp = vec.crossProduct(downVector);
 				perp.normalize();
-				perp *= ROAD_WIDTH/2.0;
+				perp.scale(ROAD_WIDTH/2.0);
 
 				osg::Vec3Array* roadVertices = new osg::Vec3Array;
 				roadVertices->push_back(osg::Vec3(start.x()-perp.i(), start.y()-perp.j(), start.z()-perp.k())); // front left

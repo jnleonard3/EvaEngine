@@ -82,11 +82,10 @@ namespace eva
 
 			const AbstractPoint<T,N> projectOnto(const AbstractPoint<T,N> &vecPt, const GenericVector<T,N> &vec) const
 			{
-				GenericVector<T,N> vecPtVec(vecPt), thisPtVec(*this), vecNorm = vec;
-				vecNorm.normalize();
+				GenericVector<T,N> vecPtVec(vecPt), thisPtVec(*this), vecNorm = vec.normalized();
 				thisPtVec -= vecPtVec;
 				T scale = thisPtVec.dotProduct(vec)/vec.magnitude();
-				return AbstractPoint<T,N>(vecPt,vecNorm * scale);
+				return AbstractPoint<T,N>(vecPt,vecNorm.scaled(scale));
 			}
 
 			template <e_uchar8 M>

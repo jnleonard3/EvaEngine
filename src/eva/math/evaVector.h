@@ -57,6 +57,13 @@ namespace eva
 				}
 			}
 
+			const GenericVector<T,N> normalized() const
+			{
+				GenericVector<T,N> norm = *this;
+				norm.normalize();
+				return norm;
+			}
+
 			// Keep in mind that all rotations operate in the
 			// clockwise direction
 			void applyMatrix(const Matrix<T>& rotMat)
@@ -67,6 +74,26 @@ namespace eva
 					for(e_uchar8 i = 0; i < N; ++i)
 						(*this)[i] = mult.at(i);
 				}
+			}
+
+			const GenericVector<T,N> matrixApplied(const Matrix<T>& rotMat) const
+			{
+				GenericVector<T,N> mod = *this;
+				mod.applyMatrix(rotMat);
+				return mod;
+			}
+
+			void scale(e_double64 scale)
+			{
+				for(e_uchar8 i = 0; i < N; ++i)
+					(*this)[i] *= scale;
+			}
+
+			const GenericVector<T,N> scaled(e_double64 scale) const
+			{
+				GenericVector<T,N> mod = *this;
+				mod.scale(scale);
+				return mod;
 			}
 
 			GenericVector<T,N>& operator+=(const FixedArray<T,N>& rhs)
@@ -80,13 +107,6 @@ namespace eva
 			{
 				for(e_uchar8 i = 0; i < N; ++i)
 					(*this)[i] -= rhs[i];
-				return *this;
-			}
-
-			GenericVector<T,N>& operator*=(e_double64 scale)
-			{
-				for(e_uchar8 i = 0; i < N; ++i)
-					(*this)[i] *= scale;
 				return *this;
 			}
 
@@ -115,17 +135,6 @@ namespace eva
 				return val;
 			}
 
-			const GenericVector<T,N> crossProduct(const GenericVector<T,N>& rhs) const
-			{
-				if(N != 3)
-					return GenericVector<T,N>();
-				GenericVector<T,N> cross;
-				cross[0] = ((*this)[1]*rhs[2])-(rhs[1]*(*this)[2]);
-				cross[1] = ((*this)[0]*rhs[2])-(rhs[0]*(*this)[2]);
-				cross[2] = ((*this)[0]*rhs[1])-(rhs[0]*(*this)[1]);
-				return cross;
-			}
-
 			T angleBetween(const GenericVector<T,N>& rhs) const
 			{
 				T magnitude = this->magnitude()*rhs.magnitude();
@@ -151,13 +160,6 @@ namespace eva
 			{
 				GenericVector<T,N> result = *this;
 				result -= rhs;
-				return result;
-			}
-
-			const GenericVector<T,N> operator*(T scale) const
-			{
-				GenericVector<T,N> result = *this;
-				result *= scale;
 				return result;
 			}
 	};

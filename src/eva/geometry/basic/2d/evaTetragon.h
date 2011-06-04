@@ -54,8 +54,8 @@ namespace eva
 				Vector2D<T>* vectors = this->getVectors();
 				vectors[0] = Vector2D<T>(to.x()-this->getCenter().x(),to.y()-this->getCenter().y());
 				vectors[1] = Vector2D<T>(vectors[0].i(),-vectors[0].j());
-				vectors[2] = vectors[0]*-1;
-				vectors[3] = vectors[1]*-1;
+				vectors[2] = vectors[0].scaled(-1.0);
+				vectors[3] = vectors[1].scaled(-1.0);
 				this->recalculate();
 			};
 			Tetragon(const Point2D<T>& center, const Vector2D<T>& tl)
@@ -64,8 +64,8 @@ namespace eva
 				Vector2D<T>* vectors = this->getVectors();
 				vectors[0] = tl;
 				vectors[1] = Vector2D<T>(tl.i(),-tl.j());
-				vectors[2] = vectors[0]*-1;
-				vectors[3] = vectors[1]*-1;
+				vectors[2] = vectors[0].scaled(-1.0);
+				vectors[3] = vectors[1].scaled(-1.0);
 				this->recalculate();
 			};
 			Tetragon(const Point2D<T>& center, const Vector2D<T>& tl, const Vector2D<T>& bl)
@@ -74,8 +74,8 @@ namespace eva
 				Vector2D<T>* vectors = this->getVectors();
 				vectors[0] = tl;
 				vectors[1] = bl;
-				vectors[2] = vectors[0]*-1;
-				vectors[3] = vectors[1]*-1;
+				vectors[2] = vectors[0].scaled(-1.0);
+				vectors[3] = vectors[1].scaled(-1.0);
 				this->recalculate();
 			};
 			Tetragon(const Point2D<T>& center, T radius)
@@ -84,8 +84,8 @@ namespace eva
 				Vector2D<T>* vectors = this->getVectors();
 				vectors[0] = Vector2D<T>(radius,radius);
 				vectors[1] = Vector2D<T>(radius,-radius);
-				vectors[2] = vectors[0]*-1;
-				vectors[3] = vectors[1]*-1;
+				vectors[2] = vectors[0].scaled(-1.0);
+				vectors[3] = vectors[1].scaled(-1.0);
 				this->recalculate();
 			}
 			virtual ~Tetragon(){};

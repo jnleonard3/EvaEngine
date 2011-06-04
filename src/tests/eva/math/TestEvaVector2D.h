@@ -35,9 +35,9 @@ class TestEvaVector2D : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(constructorTest);
     CPPUNIT_TEST(normalizeTest);
     CPPUNIT_TEST(applyMatrixTest);
+    CPPUNIT_TEST(scaleTest);
     CPPUNIT_TEST(additionCompoundAssignmentTest);
     CPPUNIT_TEST(subtractionCompundAssignmentTest);
-    CPPUNIT_TEST(multiplicationCompoundAssignmentTest);
     CPPUNIT_TEST(isZeroTest);
     CPPUNIT_TEST(magnitudeTest);
     CPPUNIT_TEST(dotProductTest);
@@ -45,7 +45,6 @@ class TestEvaVector2D : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(toMatrixTest);
     CPPUNIT_TEST(additionTest);
     CPPUNIT_TEST(subtractionTest);
-    CPPUNIT_TEST(multiplicationTest);
     CPPUNIT_TEST_SUITE_END();
 
 	public:
@@ -57,9 +56,9 @@ class TestEvaVector2D : public CPPUNIT_NS::TestFixture
 		void constructorTest();
 		void normalizeTest();
 		void applyMatrixTest();
+		void scaleTest();
 		void additionCompoundAssignmentTest();
 		void subtractionCompundAssignmentTest();
-		void multiplicationCompoundAssignmentTest();
 		void isZeroTest();
 		void magnitudeTest();
 		void dotProductTest();
@@ -67,7 +66,6 @@ class TestEvaVector2D : public CPPUNIT_NS::TestFixture
 		void toMatrixTest();
 		void additionTest();
 		void subtractionTest();
-		void multiplicationTest();
 
 		// Vector 2D Methods
 		void angleTest();
