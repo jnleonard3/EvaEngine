@@ -26,7 +26,7 @@
 #define FIXEDQUADTREE_H_
 
 #include "eva/Typedefs.h"
-#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/math/evaPoint.h"
 #include "eva/geometry/basic/2d/evaLine2D.h"
 #include "eva/geometry/basic/2d/evaSquare.h"
 #include "eva/geometry/basic/2d/evaRectangle.h"

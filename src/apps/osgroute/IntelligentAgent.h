@@ -27,7 +27,7 @@
 
 #include "RoadCommon.h"
 
-#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/math/evaPoint.h"
 #include "eva/geometry/basic/2d/evaLine2D.h"
 #include "eva/geometry/basic/2d/evaRectangle.h"
 #include "eva/route/evaRouteGraph.h"

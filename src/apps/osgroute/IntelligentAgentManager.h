@@ -29,7 +29,7 @@
 #include "FixedQuadtree.h"
 #include "IntelligentAgent.h"
 
-#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/math/evaPoint.h"
 #include "eva/geometry/basic/2d/evaSquare.h"
 #include "eva/math/evaVector.h"
 

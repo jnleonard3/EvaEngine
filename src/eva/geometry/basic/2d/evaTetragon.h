@@ -27,7 +27,7 @@
 
 #include "eva/Typedefs.h"
 #include "eva/geometry/generic/evaFixedPolygon.h"
-#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/math/evaPoint.h"
 
 namespace eva
 {

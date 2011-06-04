@@ -33,17 +33,17 @@
 namespace eva
 {
 	template <class T>
-	class Point2D : public AbstractPoint<T,2>
+	class Point2D : public GenericPoint<T,2>
 	{
 		public:
 			Point2D()
-			:AbstractPoint<T,2>(){};
+			:GenericPoint<T,2>(){};
 			Point2D(T x, T y)
-			:AbstractPoint<T,2>(){this->x() = x; this->y() = y;};
+			:GenericPoint<T,2>(){this->x() = x; this->y() = y;};
 			Point2D(const Point2D<T> &pt, const FixedArray<T,2> &vec)
-			:AbstractPoint<T,2>(pt,vec){};
+			:GenericPoint<T,2>(pt,vec){};
 			Point2D(const FixedArray<T,2>& array)
-			:AbstractPoint<T,2>(array){};
+			:GenericPoint<T,2>(array){};
 
 			T& x(){return (*this)[0];};
 			const T& x() const {return (*this)[0];};

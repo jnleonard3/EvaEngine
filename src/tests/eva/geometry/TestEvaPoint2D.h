@@ -4,7 +4,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/math/evaPoint.h"
 
 class TestEvaPoint2D : public CPPUNIT_NS :: TestFixture
 {

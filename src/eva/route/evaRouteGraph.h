@@ -27,7 +27,7 @@
 
 #include "eva/Typedefs.h"
 #include "eva/geometry/basic/3d/evaLine3D.h"
-#include "eva/geometry/basic/3d/evaPoint3D.h"
+#include "eva/math/evaPoint.h"
 #include "eva/structures/evaSimpleDynamicArray.h"
 #include "eva/route/evaRouteGraphEdge.h"
 #include "eva/route/evaRouteNode.h"

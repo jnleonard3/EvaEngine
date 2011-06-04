@@ -27,7 +27,7 @@
 
 #include "eva/math/evaVector.h"
 #include "eva/math/evaMathCommon.h"
-#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/math/evaPoint.h"
 #include "eva/geometry/basic/2d/evaLine2D.h"
 #include "eva/geometry/basic/2d/evaTetragon.h"
 

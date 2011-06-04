@@ -26,7 +26,7 @@
 #define EVA_LINE2D_H_
 
 #include "eva/Typedefs.h"
-#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/math/evaPoint.h"
 #include "eva/math/evaVector.h"
 #include "eva/math/evaMathCommon.h"
 #include "math.h"

@@ -13,7 +13,7 @@
 #include <osgGA/TrackballManipulator>
 #include <osgGA/UFOManipulator>
 
-#include "eva/geometry/basic/3d/evaPoint3D.h"
+#include "eva/math/evaPoint.h"
 
 namespace eva
 {

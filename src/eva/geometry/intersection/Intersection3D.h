@@ -26,7 +26,7 @@
 #define EVA_INTERSECTION3D_H_
 
 #include "eva/math/evaMathCommon.h"
-#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/math/evaPoint.h"
 #include "eva/geometry/basic/2d/evaLine2D.h"
 
 namespace eva

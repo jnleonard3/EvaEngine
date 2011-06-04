@@ -26,7 +26,7 @@
 #define EVA_BEZIERCURVE_H_
 
 #include "eva/Typedefs.h"
-#include "eva/geometry/generic/evaAbstractPoint.h"
+#include "eva/math/evaPoint.h"
 
 #include "math.h"
 	
@@ -36,13 +36,13 @@ namespace eva
 	class BezierCurve
 	{
 		public:
-			BezierCurve(const AbstractPoint<T,N>& p0, const AbstractPoint<T,N>& p1, const AbstractPoint<T,N>& p2)
+			BezierCurve(const GenericPoint<T,N>& p0, const GenericPoint<T,N>& p1, const GenericPoint<T,N>& p2)
 			:mP0(p0),mP1(p1),mP2(p2),mNumPoints(5),mBezierPoints(0)
 			{
 				this->recalulate(mNumPoints);
 			}
 
-			BezierCurve(e_uchar8 points, const AbstractPoint<T,N>& p0, const AbstractPoint<T,N>& p1, const AbstractPoint<T,N>& p2)
+			BezierCurve(e_uchar8 points, const GenericPoint<T,N>& p0, const GenericPoint<T,N>& p1, const GenericPoint<T,N>& p2)
 			:mP0(p0),mP1(p1),mP2(p2),mNumPoints(points),mBezierPoints(0)
 			{
 				this->recalulate(mNumPoints);
@@ -55,7 +55,7 @@ namespace eva
 
 			void recalculate(e_uchar8 points)
 			{
-				mBezierPoints = new AbstractPoint<T,N>[points];
+				mBezierPoints = new GenericPoint<T,N>[points];
 				e_double64 inc = 1.0/(e_double64)points;
 
 				e_uchar8 i = 0;
@@ -71,9 +71,9 @@ namespace eva
 			}
 
 			const e_uchar8 getNumPoints() const { return mNumPoints; };
-			const AbstractPoint<T,N> getPoint(e_uchar8 index) const { return mBezierPoints[index]; };
+			const GenericPoint<T,N> getPoint(e_uchar8 index) const { return mBezierPoints[index]; };
 
-			const AbstractPoint<T,N> getValue(e_float32 t) const
+			const GenericPoint<T,N> getValue(e_float32 t) const
 			{
 				e_double64 t0 = pow(1.0-t,2);
 				e_double64 t1 = 2.0*(1.0-t)*t;
@@ -82,10 +82,10 @@ namespace eva
 			}
 
 		private:
-			AbstractPoint<T,N> mP0, mP1, mP2;
+			GenericPoint<T,N> mP0, mP1, mP2;
 
 			e_uchar8 mNumPoints;
-			AbstractPoint<T,N>* mBezierPoints;
+			GenericPoint<T,N>* mBezierPoints;
 	};
 };
 

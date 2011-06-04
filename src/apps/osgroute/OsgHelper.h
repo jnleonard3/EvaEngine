@@ -28,8 +28,7 @@
 #include "FixedQuadtree.h"
 
 #include "eva/Typedefs.h"
-#include "eva/geometry/basic/3d/evaPoint3D.h"
-#include "eva/geometry/basic/2d/evaPoint2D.h"
+#include "eva/math/evaPoint.h"
 #include "eva/geometry/basic/2d/evaSquare.h"
 #include "IntelligentAgentManager.h"
 
