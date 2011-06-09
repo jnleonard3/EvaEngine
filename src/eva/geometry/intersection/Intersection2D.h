@@ -28,7 +28,7 @@
 #include "eva/math/evaVector.h"
 #include "eva/math/evaMathCommon.h"
 #include "eva/math/evaPoint.h"
-#include "eva/geometry/basic/2d/evaLine2D.h"
+#include "eva/geometry/evaLine.h"
 #include "eva/geometry/basic/2d/evaTetragon.h"
 
 #include <iostream>
@@ -45,13 +45,14 @@ namespace eva
 			template <class T>
 			static bool Intersects(const Line2D<T>& line, const Point2D<T>& pt)
 			{
-				Vector2D<T> lineVec(line.from().x(),line.from().y(),line.to().x(),line.to().y());
+				Point2D<T> fromPt = Point2D<T>(line.getFrom()), toPt = Point2D<T>(line.getTo());
+				Vector2D<T> lineVec(fromPt.x(),fromPt.y(),toPt.x(),toPt.y());
 				if(lineVec.i() != 0)
 				{
-					T y = ((lineVec.j()/lineVec.i())*pt.x() - line.from().x()) + line.from().y();
+					T y = ((lineVec.j()/lineVec.i())*pt.x() - fromPt.x()) + fromPt.y();
 					if(y == pt.y())
-						if(MathCommon::isWithin<T>(line.from().x(),line.to().x(),pt.x()))
-							if(MathCommon::isWithin<T>(line.from().y(),line.to().y(),pt.y()))
+						if(MathCommon::isWithin<T>(fromPt.x(),toPt.x(),pt.x()))
+							if(MathCommon::isWithin<T>(fromPt.y(),toPt.y(),pt.y()))
 								return true;
 				}
 				return false;
@@ -64,12 +65,14 @@ namespace eva
 			template <class T>
 			static bool Intersection(const Line2D<T>& a, const Line2D<T>& b, Point2D<T>& pt)
 			{
-				e_double64 AOne = a.to().y() - a.from().y();
-				e_double64 BOne = a.from().x() - a.to().x();
-				e_double64 COne = AOne*a.from().x()+BOne*a.from().y();
-				e_double64 ATwo = b.to().y() - b.from().y();
-				e_double64 BTwo = b.from().x() - b.to().x();
-				e_double64 CTwo = ATwo*b.from().x()+BTwo*b.from().y();
+				Point2D<T> aFromPt = Point2D<T>(a.getFrom()), aToPt = Point2D<T>(a.getTo());
+				Point2D<T> bFromPt = Point2D<T>(b.getFrom()), bToPt = Point2D<T>(b.getTo());
+				e_double64 AOne = aToPt.y() - aFromPt.y();
+				e_double64 BOne = aFromPt.x() - aToPt.x();
+				e_double64 COne = AOne*aFromPt.x()+BOne*aFromPt.y();
+				e_double64 ATwo = bToPt.y() - bFromPt.y();
+				e_double64 BTwo = bFromPt.x() - bToPt.x();
+				e_double64 CTwo = ATwo*bFromPt.x()+BTwo*bFromPt.y();
 				e_double64 det = AOne*BTwo-ATwo*BOne;
 				if(det == 0.0)
 					return false;
@@ -77,8 +80,8 @@ namespace eva
 				{
 					T x = (BTwo*COne-BOne*CTwo)/det;
 					T y = (AOne*CTwo-ATwo*COne)/det;
-					if(MathCommon::isWithin<T>(a.from().x(),a.to().x(),x) && MathCommon::isWithin<T>(a.from().y(),a.to().y(),y))
-						if(MathCommon::isWithin<T>(b.from().x(),b.to().x(),x) && MathCommon::isWithin<T>(b.from().y(),b.to().y(),y))
+					if(MathCommon::isWithin<T>(aFromPt.x(),aToPt.x(),x) && MathCommon::isWithin<T>(aFromPt.y(),aToPt.y(),y))
+						if(MathCommon::isWithin<T>(bFromPt.x(),bToPt.x(),x) && MathCommon::isWithin<T>(bFromPt.y(),bToPt.y(),y))
 						{
 							pt.x() = x;
 							pt.y() = y;
@@ -115,9 +118,9 @@ namespace eva
 			template <class T>
 			static bool Intersection(const Tetragon<T>& tetra, const Line2D<T>& line, Point2D<T> &pt)
 			{
-				if(Intersection2D::Intersects<T>(line.from(),tetra))
+				if(Intersection2D::Intersects<T>(Point2D<T>(line.getFrom()),tetra))
 				{
-					pt = line.from();
+					pt = Point2D<T>(line.getFrom());
 					return true;
 				}
 
@@ -156,29 +159,32 @@ namespace eva
 				Vector2D<T> lineAVec = a.toVector();
 				Vector2D<T> lineBVec = b.toVector();
 
+				Point2D<T> aFromPt = Point2D<T>(a.getFrom());
+				Point2D<T> bFromPt = Point2D<T>(b.getFrom());
+
 				if(lineAVec.i() != 0 && lineBVec.i() != 0)
 				{
-					T yA = (lineAVec.j()/lineAVec.i())*(pt.x() - a.from().x()) + a.from().y();
-					T yB = (lineBVec.j()/lineBVec.i())*(pt.x() - b.from().x()) + b.from().y();
+					T yA = (lineAVec.j()/lineAVec.i())*(pt.x() - aFromPt.x()) + aFromPt.y();
+					T yB = (lineBVec.j()/lineBVec.i())*(pt.x() - bFromPt.x()) + bFromPt.y();
 					if(MathCommon::isWithin<T>(yA,yB,pt.y()))
 						return true;
 				}
 				else
 				{
-					if(MathCommon::isWithin<T>(a.from().x(),b.from().x(),pt.x()))
+					if(MathCommon::isWithin<T>(aFromPt.x(),bFromPt.x(),pt.x()))
 						return true;
 				}
 
 				if(lineAVec.j() != 0 && lineBVec.j() != 0)
 				{
-					T xA = (lineAVec.i()/lineAVec.j())*(pt.y() - a.from().y()) + a.from().x();
-					T xB = (lineBVec.i()/lineBVec.j())*(pt.y() - b.from().y()) + b.from().x();
+					T xA = (lineAVec.i()/lineAVec.j())*(pt.y() - aFromPt.y()) + aFromPt.x();
+					T xB = (lineBVec.i()/lineBVec.j())*(pt.y() - bFromPt.y()) + bFromPt.x();
 					if(MathCommon::isWithin<T>(xA,xB,pt.x()))
 						return true;
 				}
 				else
 				{
-					if(MathCommon::isWithin<T>(a.from().y(),b.from().y(),pt.y()))
+					if(MathCommon::isWithin<T>(aFromPt.y(),bFromPt.y(),pt.y()))
 						return true;
 				}
 				return false;

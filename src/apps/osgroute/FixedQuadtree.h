@@ -27,7 +27,7 @@
 
 #include "eva/Typedefs.h"
 #include "eva/math/evaPoint.h"
-#include "eva/geometry/basic/2d/evaLine2D.h"
+#include "eva/geometry/evaLine.h"
 #include "eva/geometry/basic/2d/evaSquare.h"
 #include "eva/geometry/basic/2d/evaRectangle.h"
 #include "eva/geometry/intersection/Intersection2D.h"
@@ -281,25 +281,25 @@ class FixedQuadtree
 					if(eva::Intersection2D::Intersection<e_double64>(query,quad->mTR->mQuad,intersection))
 					{
 						quads[0] = quad->mTR;
-						distance[0] = query.from().distance(intersection);
+						distance[0] = query.getFrom().distance(intersection);
 					}
 
 					if(eva::Intersection2D::Intersection<e_double64>(query,quad->mTL->mQuad,intersection))
 					{
 						quads[1] = quad->mTL;
-						distance[1] = query.from().distance(intersection);
+						distance[1] = query.getFrom().distance(intersection);
 					}
 
 					if(eva::Intersection2D::Intersection<e_double64>(query,quad->mBL->mQuad,intersection))
 					{
 						quads[2] = quad->mBL;
-						distance[2] = query.from().distance(intersection);
+						distance[2] = query.getFrom().distance(intersection);
 					}
 
 					if(eva::Intersection2D::Intersection<e_double64>(query,quad->mBR->mQuad,intersection))
 					{
 						quads[3] = quad->mBR;
-						distance[3] = query.from().distance(intersection);
+						distance[3] = query.getFrom().distance(intersection);
 					}
 
 					for(e_uchar8 i = 0; i < 4; ++i)

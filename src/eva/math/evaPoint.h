@@ -171,6 +171,9 @@ namespace eva
 
 	};
 
+	/**
+	 * A point in a two dimensional cartesian coordinate system.
+	 */
 	template <class T>
 	class Point2D : public GenericPoint<T,2>
 	{
@@ -220,6 +223,9 @@ namespace eva
 	typedef Point2D<e_float32> Point2Df;
 	typedef Point2D<e_double64> Point2Dd;
 
+	/**
+	 * A point in a three dimensional cartesian coordinate system.
+	 */
 	template <class T>
 	class Point3D : public GenericPoint<T,3>
 	{

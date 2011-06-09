@@ -3,7 +3,7 @@
 
 #include "eva/Typedefs.h"
 #include "eva/math/evaVector.h"
-#include "eva/geometry/basic/3d/evaLine3D.h"
+#include "eva/geometry/evaLine.h"
 #include "eva/geometry/basic/3d/evaCuboid.h"
 
 namespace eva

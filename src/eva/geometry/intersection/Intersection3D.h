@@ -27,7 +27,7 @@
 
 #include "eva/math/evaMathCommon.h"
 #include "eva/math/evaPoint.h"
-#include "eva/geometry/basic/2d/evaLine2D.h"
+#include "eva/geometry/evaLine.h"
 
 namespace eva
 {
@@ -41,12 +41,14 @@ namespace eva
 			template <class T>
 			static bool Intersection(const Line3D<T>& a, const Line3D<T>& b, Point3D<T>& pt)
 			{
-				e_double64 AOne = a.to().y() - a.from().y();
-				e_double64 BOne = a.from().x() - a.to().x();
-				e_double64 COne = AOne*a.from().x()+BOne*a.from().y();
-				e_double64 ATwo = b.to().y() - b.from().y();
-				e_double64 BTwo = b.from().x() - b.to().x();
-				e_double64 CTwo = ATwo*b.from().x()+BTwo*b.from().y();
+				Point3D<T> aFromPt = Point3D<T>(a.getFrom()), aToPt = Point3D<T>(a.getTo());
+				Point3D<T> bFromPt = Point3D<T>(b.getFrom()), bToPt = Point3D<T>(b.getTo());
+				e_double64 AOne = aToPt.y() - aFromPt.y();
+				e_double64 BOne = aFromPt.x() - aToPt.x();
+				e_double64 COne = AOne*aFromPt.x()+BOne*aFromPt.y();
+				e_double64 ATwo = bToPt.y() - bFromPt.y();
+				e_double64 BTwo = bFromPt.x() - bToPt.x();
+				e_double64 CTwo = ATwo*bFromPt.x()+BTwo*bFromPt.y();
 				e_double64 det = AOne*BTwo-ATwo*BOne;
 				if(det == 0.0)
 					return false;
@@ -54,8 +56,8 @@ namespace eva
 				{
 					T x = (BTwo*COne-BOne*CTwo)/det;
 					T y = (AOne*CTwo-ATwo*COne)/det;
-					if(MathCommon::isWithin<T>(a.from().x(),a.to().x(),x) && MathCommon::isWithin<T>(a.from().y(),a.to().y(),y))
-						if(MathCommon::isWithin<T>(b.from().x(),b.to().x(),x) && MathCommon::isWithin<T>(b.from().y(),b.to().y(),y))
+					if(MathCommon::isWithin<T>(aFromPt.x(),aToPt.x(),x) && MathCommon::isWithin<T>(aFromPt.y(),aToPt.y(),y))
+						if(MathCommon::isWithin<T>(bFromPt.x(),bToPt.x(),x) && MathCommon::isWithin<T>(bFromPt.y(),bToPt.y(),y))
 						{
 							pt.x() = x;
 							pt.y() = y;

@@ -27,7 +27,7 @@
 
 #include "eva/Typedefs.h"
 #include "eva/math/evaPoint.h"
-#include "eva/geometry/basic/3d/evaLine3D.h"
+#include "eva/geometry/evaLine.h"
 	
 namespace eva
 {

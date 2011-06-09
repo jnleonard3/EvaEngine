@@ -46,8 +46,8 @@ osg::Group* OsgHelper::drawLine(const eva::Line3Dd &line)
 	baseGeode->addDrawable(baseGeometry);
 
 	osg::Vec3Array* baseVertices = new osg::Vec3Array;
-	baseVertices->push_back(eva3DPointToOsgVec(line.from()));
-	baseVertices->push_back(eva3DPointToOsgVec(line.to()));
+	baseVertices->push_back(eva3DPointToOsgVec(eva::Point3Dd(line.getFrom())));
+	baseVertices->push_back(eva3DPointToOsgVec(eva::Point3Dd(line.getTo())));
 	baseGeometry->setVertexArray(baseVertices);
 
 	osg::DrawElementsUInt* lineElems =  new osg::DrawElementsUInt(osg::PrimitiveSet::LINES, 0);

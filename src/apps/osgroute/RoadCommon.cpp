@@ -4,7 +4,7 @@
 #include "eva/route/evaRouteGraph.h"
 #include "eva/math/evaVector.h"
 #include "eva/math/evaMathCommon.h"
-#include "eva/geometry/basic/3d/evaLine3D.h"
+#include "eva/geometry/evaLine.h"
 #include "eva/geometry/intersection/Intersection3D.h"
 
 void RoadCommon::addRoad(eva::Point3Dd start, eva::Point3Dd end, std::vector<Road> &roads, eva::RouteGraph &graph)

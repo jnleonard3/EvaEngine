@@ -33,7 +33,7 @@
 #include "eva/route/evaRouteGraph.h"
 #include "eva/math/evaVector.h"
 #include "eva/math/evaMathCommon.h"
-#include "eva/geometry/basic/3d/evaLine3D.h"
+#include "eva/geometry/evaLine.h"
 #include "eva/math/evaPoint.h"
 #include "eva/geometry/basic/2d/evaRectangle.h"
 #include "eva/geometry/basic/2d/evaSquare.h"
